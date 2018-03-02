@@ -2,7 +2,8 @@
 OpenGL courseworks for the graphics module!  
 
 ## Coursework 1 ## 
-Draw things on OpenGL based on requirements in specification.   
+Draw things on OpenGL based on requirements in specification.  
+    
 A = wire-frame sphere.   
 B = shaded sphere.  
 C = draw rocket and have animations.  
