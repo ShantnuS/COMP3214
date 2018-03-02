@@ -17,6 +17,7 @@ GLuint projectionHandle;
 float theta = 0.0f;
 
 GLuint program;
+int currentScreen;
 
 //Cube vertex data array
 GLfloat cube_VB[] = {
@@ -250,6 +251,20 @@ int bufferInit() {
 	return 0;
 }
 
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+	//Close on esc or Q press
+	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	//Switch to screen 1 on A press
+	if ((key == GLFW_KEY_A) && action == GLFW_PRESS) {
+		currentScreen = 1;
+		printf("Switching to screen 1\n");
+	}
+}
+
 int handleInit() {
 	modelHandle = glGetUniformLocation(program, "model");
 	viewHandle = glGetUniformLocation(program, "view");
@@ -258,7 +273,7 @@ int handleInit() {
 }
 
 int cw1shan_main() {
-	//printf("Hello");
+	currentScreen = 0;
 
 	glfwSetErrorCallback(error_callback);
 	glfwInit();
@@ -272,6 +287,7 @@ int cw1shan_main() {
 	}
 	glfwMakeContextCurrent(window);
 
+	glfwSetKeyCallback(window, key_callback);
 	glewInit();
 
 	program = LoadShader("shader.vert", "shader.frag");
