@@ -379,7 +379,7 @@ void draw() {
 			glFinish();
 			break;
 		case 4: 
-			cube.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
+			cube.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0)) * scale(mat4(1), vec3(2,2,2));
 			glUniform1i(texHandle,cube.texID);
 			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &cube.model[0][0]);
 			glActiveTexture(GL_TEXTURE0 + cube.texID);
@@ -412,7 +412,7 @@ void init() {
 
 	vector<Normal> object2 = generateCube();
 	cube = bufferInit(object1);
-	cube.texID = loadTexture("texture/mars.bmp");
+	cube.texID = loadTexture("texture/grass.bmp");
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
