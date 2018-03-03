@@ -5,6 +5,7 @@
 #include <sstream>
 #include "opengl.h"
 #include "utils.h"
+#include "stb_image\stb_image.h"
 
 using namespace glm;
 using namespace std;
@@ -16,6 +17,7 @@ GLuint modelHandle;
 GLuint viewHandle;
 GLuint projectionHandle;
 GLuint lightHandle;
+GLuint texHandle;
 
 vec3 lightDirection = vec3(1.0f, 0.0f, 0.0f);
 float theta = 0.0f;
@@ -28,6 +30,7 @@ vec3 position = vec3(0.0f, -3.0f, 0.0f);
 GLuint program;
 GLuint programA;
 GLuint programB;
+GLuint programD;
 int currentScreen;
 
 struct Object {
@@ -35,22 +38,90 @@ struct Object {
 	GLuint vert_b;
 	int size;
 	mat4 model;
+	GLuint texID;
 };
 
 struct Normal {
 	vec3 normal;
 	vec3 direction;
+	vec2 uv;
 };
 
 Object sphere;
 Object sphere2;
 Object sphere3;
 Object sphere4;
+Object cube;
+
+//Cube vertex data array
+GLfloat cube_VB[] = {
+	-1.0f,-1.0f,-1.0f, // triangle 1 : begin
+	-1.0f,-1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, // triangle 1 : end
+	1.0f, 1.0f,-1.0f, // triangle 2 : begin
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f, // triangle 2 : end
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	-1.0f,-1.0f,-1.0f,
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f
+};
+
+glm::vec2 getPolar(glm::vec3 v)
+{
+	float r = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+	return glm::vec2(atan(v.y / v.x), acos(v.z / r));
+}
 
 //Error callback  
 static void error_callback(int error, const char* description){
 	fputs(description, stderr);
 	_fgetchar();
+}
+
+GLuint loadTexture(const char *fname){
+	int w, h, n;
+	unsigned char *data = stbi_load(fname, &w, &h, &n, 0);
+
+	GLuint tex = 1;
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	delete data;
+	return tex;
 }
 
 vec3 getPolarCoordinate(float i, float j) {
@@ -156,24 +227,39 @@ GLuint LoadShader(const char * vertex_file_path, const char * fragment_file_path
 	return ProgramID;
 }
 
-std::vector<Normal> getNormal(vector<vec3> sphereVectors) {
+std::vector<Normal> getNormal(vector<vec3> v) {
 	vector<vec3> tempVec;
 	vector<Normal> returnThing;
 
-	for (int i = 0; i < sphereVectors.size(); i += 3) {
-		tempVec.push_back(normalize(cross(sphereVectors[i + 1] - sphereVectors[i], sphereVectors[i + 2] - sphereVectors[i])));
-		tempVec.push_back(normalize(cross(sphereVectors[i + 1] - sphereVectors[i], sphereVectors[i + 2] - sphereVectors[i])));
-		tempVec.push_back(normalize(cross(sphereVectors[i + 1] - sphereVectors[i], sphereVectors[i + 2] - sphereVectors[i])));
+	for (int i = 0; i < v.size(); i += 3) {
+		tempVec.push_back(normalize(cross(v[i + 1] - v[i], v[i + 2] - v[i])));
+		tempVec.push_back(normalize(cross(v[i + 1] - v[i], v[i + 2] - v[i])));
+		tempVec.push_back(normalize(cross(v[i + 1] - v[i], v[i + 2] - v[i])));
 	}
 
-	for (int i = 0; i < sphereVectors.size(); i++) {
+	std::vector<vec2> texCoord;
+	for (int i = 0; i < v.size(); i++) {
+		texCoord.push_back(getPolar(v[i]));
+	}
+
+	for (int i = 0; i < v.size(); i++) {
 		Normal n;
-		n.direction = sphereVectors[i];
+		n.direction = v[i];
 		n.normal = tempVec[i];
+		n.uv = texCoord[i];
 		returnThing.push_back(n);
 	}
 
 	return returnThing;
+}
+
+std::vector<Normal> generateCube()
+{
+	std::vector<glm::vec3> v;
+	for (int i = 0; i < 36; i++)
+		v.push_back(glm::vec3(cube_VB[i * 3], cube_VB[i * 3 + 1], cube_VB[i * 3 + 2]));
+
+	return getNormal(v);
 }
 
 std::vector<Normal> generateSphere(float step) {
@@ -192,9 +278,7 @@ std::vector<Normal> generateSphere(float step) {
 			sphereVectors.push_back(getPolarCoordinate(i, j));
 		}
 	}
-
-	vector<Normal> returnThing = getNormal(sphereVectors);
-	return returnThing;
+	return getNormal(sphereVectors);
 }
 
 Object bufferInit(vector<Normal> vp) {
@@ -216,6 +300,9 @@ Object bufferInit(vector<Normal> vp) {
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct Normal), (GLvoid*) offsetof(struct Normal, normal));
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Normal), (GLvoid*)offsetof(struct Normal, uv));
+	glEnableVertexAttribArray(2);
 
 	glBindVertexArray(0);
 	return myObj;
@@ -247,43 +334,63 @@ void draw() {
 	switch(currentScreen){
 		//Screen A
 		case 1:
-			glBindVertexArray(sphere.vao);
 			sphere.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
 			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere.model[0][0]);
+			glBindVertexArray(sphere.vao);
 			glDrawArrays(GL_LINE_LOOP, 0, sphere.size);
+			glBindVertexArray(0);
+			glFinish();
 			break;
 		//Screen B
 		case 2:
-			glBindVertexArray(sphere.vao);
 			sphere.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
 			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere.model[0][0]);
+			glBindVertexArray(sphere.vao);
 			glDrawArrays(GL_TRIANGLES, 0, sphere.size);
+			glBindVertexArray(0);
+			glFinish();
 			break;
-		case 3:
-			glBindVertexArray(sphere2.vao);
+		case 3:	
 			position.y += 0.0001f;
 			mat4 model = translate(mat4(1), position) * rotate(mat4(1), theta, vec3(0, 1, 0));
 
 			sphere2.model = translate(mat4(1), vec3(0,1,0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
 			sphere2.model = model * sphere2.model;
 			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere2.model[0][0]);
+			glBindVertexArray(sphere2.vao);
 			glDrawArrays(GL_TRIANGLES, 0, sphere2.size);
+			glBindVertexArray(0);
+			glFinish();
 
 			sphere3.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
 			sphere3.model = model * sphere3.model;
 			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere3.model[0][0]);
+			glBindVertexArray(sphere3.vao);
 			glDrawArrays(GL_TRIANGLES, 0, sphere3.size);
+			glBindVertexArray(0);
+			glFinish();
 
 			sphere4.model = translate(mat4(1), vec3(0, -1, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
 			sphere4.model = model * sphere4.model;
 			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere4.model[0][0]);
+			glBindVertexArray(sphere4.vao);
 			glDrawArrays(GL_TRIANGLES, 0, sphere4.size);
-
+			glBindVertexArray(0);
+			glFinish();
+			break;
+		case 4: 
+			cube.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
+			glUniform1i(texHandle,cube.texID);
+			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &cube.model[0][0]);
+			glActiveTexture(GL_TEXTURE0 + cube.texID);
+			glBindTexture(GL_TEXTURE_2D, cube.texID);
+			glBindVertexArray(cube.vao);
+			glDrawArrays(GL_TRIANGLES, 0, cube.size);
+			glBindVertexArray(0);
+			glFinish();
 			break;
 	}
 
-	glBindVertexArray(0);
-	glFinish();
 }
 
 void handleInit() {
@@ -291,16 +398,21 @@ void handleInit() {
 	viewHandle = glGetUniformLocation(program, "view");
 	projectionHandle = glGetUniformLocation(program, "projection");
 	lightHandle = glGetUniformLocation(program, "lightDirection");
+	texHandle = glGetUniformLocation(program, "tex");
 }
 
 void init() {
 	//Initialise objects
-	vector<Normal> object1 = generateSphere(radians(10.0f));
+	vector<Normal> object1 = generateSphere(radians(4.0f));
 	sphere = bufferInit(object1);
 
 	sphere2 = bufferInit(object1);
 	sphere3 = bufferInit(object1);
 	sphere4 = bufferInit(object1);
+
+	vector<Normal> object2 = generateCube();
+	cube = bufferInit(object1);
+	cube.texID = loadTexture("texture/mars.bmp");
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -335,6 +447,14 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		rotateOn = false;
 		handleInit();
 		printf("Switching to screen C\n");
+	}
+
+	if ((key == GLFW_KEY_D) && action == GLFW_PRESS) {
+		currentScreen = 4;
+		program = programD;
+		rotateOn = true;
+		handleInit();
+		printf("Switching to screen D\n");
 	}
 
 	//Zoom
@@ -382,6 +502,8 @@ int cw1shan_main() {
 
 	programA = LoadShader("shader/shader.vert", "shader/shader.frag");
 	programB = LoadShader("shader/shader2.vert", "shader/shader2.frag");
+	programD = LoadShader("shader/shader4.vert", "shader/shader4.frag");
+
 	program = programA;
 	
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -391,6 +513,7 @@ int cw1shan_main() {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_TEXTURE_2D);
 
 	glEnable(GL_CULL_FACE);
 
