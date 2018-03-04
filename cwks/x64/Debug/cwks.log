@@ -66,6 +66,9 @@ c:\users\shantnu\desktop\comp3214\cwks\graphics_stuff\stb_image\stb_image.h(4298
 c:\users\shantnu\desktop\comp3214\cwks\graphics_stuff\stb_image\stb_image.h(4347): warning C4312: 'type cast': conversion from 'int' to 'float *' of greater size
 c:\users\shantnu\desktop\comp3214\cwks\graphics_stuff\stb_image\stb_image.h(4552): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
-c:\users\shantnu\desktop\comp3214\cwks\cw1shan.cpp(288): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\shantnu\desktop\comp3214\cwks\cw1shan.cpp(274): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\shantnu\desktop\comp3214\cwks\cw1shan.cpp(295): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\shantnu\desktop\comp3214\cwks\cw1shan.cpp(340): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   cwks.vcxproj -> C:\Users\Shantnu\Desktop\COMP3214\x64\Debug\cwks.exe
   cwks.vcxproj -> C:\Users\Shantnu\Desktop\COMP3214\x64\Debug\cwks.pdb (Full PDB)
