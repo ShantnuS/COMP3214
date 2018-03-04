@@ -48,10 +48,12 @@ struct Normal {
 };
 
 Object sphere;
-Object sphere2;
-Object sphere3;
-Object sphere4;
-Object cube;
+Object rocketCone;
+Object rocketBody;
+Object rocketPayload;
+Object rocketBody2;
+Object rocketBottom;
+Object texSphere;
 
 //Cube vertex data array
 GLfloat cube_VB[] = {
@@ -262,6 +264,56 @@ std::vector<Normal> generateCube()
 	return getNormal(v);
 }
 
+std::vector<Normal> generateCone(float size) {
+	std::vector<vec3> v;
+
+	//
+	// generate cone
+	//
+	int lod = 32;
+	float step = 2. * 3.141596 / float(lod);
+	float Radius = 1.;
+	float c, s, c2, s2;
+	for (float a = 0; a <= (2.0f * 3.141596f); a += step)
+	{
+		v.push_back(vec3(0.0f,0.0f,0.0f));
+		c = cos(a);
+		s = sin(a);
+		c2 = cos(a - step);
+		s2 = sin(a - step);
+		v.push_back(vec3(c, s, size));
+		v.push_back(vec3(c2, s2, size));
+	}
+
+	return getNormal(v);
+}
+
+std::vector<Normal> generateCylinder(float size) {
+
+	std::vector<vec3> v;
+	int lod = 32;
+	float step = 2. * 3.141596 / float(lod);
+	float Radius = 1.;
+	float c, s, c2, s2;
+
+	for (float a = 0; a > -(2. * 3.141596); a -= step)
+	{
+		c = Radius * cos(a);
+		s = Radius * sin(a);
+		c2 = Radius * cos(a - step);
+		s2 = Radius * sin(a - step);
+
+		v.push_back(vec3(c, s, 0.0f));
+		v.push_back(vec3(c, s, size));
+		v.push_back(vec3(c2, s2, size));
+		v.push_back(vec3(c2, s2, size));
+		v.push_back(vec3(c2, s2, 0));
+		v.push_back(vec3(c, s, 0.0f));
+	}
+
+	return getNormal(v);
+}
+
 std::vector<Normal> generateSphere(float step) {
 
 	std::vector<vec3> sphereVectors; 
@@ -351,41 +403,63 @@ void draw() {
 			glFinish();
 			break;
 		case 3:	
-			position.y += 0.0001f;
+			position.y += 0.001f;
 			mat4 model = translate(mat4(1), position) * rotate(mat4(1), theta, vec3(0, 1, 0));
 
-			sphere2.model = translate(mat4(1), vec3(0,1,0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
-			sphere2.model = model * sphere2.model;
-			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere2.model[0][0]);
-			glBindVertexArray(sphere2.vao);
-			glDrawArrays(GL_TRIANGLES, 0, sphere2.size);
+			//Rocket Cone
+			rocketCone.model = translate(mat4(1), vec3(0,2,0)) * rotate(mat4(1), theta, vec3(1, 0, 0));
+			rocketCone.model = model * rocketCone.model;
+			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &rocketCone.model[0][0]);
+			glBindVertexArray(rocketCone.vao);
+			glDrawArrays(GL_TRIANGLES, 0, rocketCone.size);
 			glBindVertexArray(0);
 			glFinish();
 
-			sphere3.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
-			sphere3.model = model * sphere3.model;
-			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere3.model[0][0]);
-			glBindVertexArray(sphere3.vao);
-			glDrawArrays(GL_TRIANGLES, 0, sphere3.size);
+			//Rocket Body
+			rocketBody.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(1, 0, 0));
+			rocketBody.model = model * rocketBody.model;
+			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &rocketBody.model[0][0]);
+			glBindVertexArray(rocketBody.vao);
+			glDrawArrays(GL_TRIANGLES, 0, rocketBody.size);
 			glBindVertexArray(0);
 			glFinish();
 
-			sphere4.model = translate(mat4(1), vec3(0, -1, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0));
-			sphere4.model = model * sphere4.model;
-			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere4.model[0][0]);
-			glBindVertexArray(sphere4.vao);
-			glDrawArrays(GL_TRIANGLES, 0, sphere4.size);
+			//Rocket Payload
+			rocketPayload.model = translate(mat4(1), vec3(0, -2.7f, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0)) * scale(mat4(1), vec3(0.9f, 0.9f, 0.9f));
+			rocketPayload.model = model * rocketPayload.model;
+			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &rocketPayload.model[0][0]);
+			glBindVertexArray(rocketPayload.vao);
+			glDrawArrays(GL_TRIANGLES, 0, rocketPayload.size);
 			glBindVertexArray(0);
 			glFinish();
+
+			//Rocket Body 2
+			rocketBody2.model = translate(mat4(1), vec3(0, -3.5f, 0)) * rotate(mat4(1), theta, vec3(1, 0, 0));
+			rocketBody2.model = model * rocketBody2.model;
+			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &rocketBody2.model[0][0]);
+			glBindVertexArray(rocketBody2.vao);
+			glDrawArrays(GL_TRIANGLES, 0, rocketBody2.size);
+			glBindVertexArray(0);
+			glFinish();
+
+			//Rocket Bottom
+			rocketBottom.model = translate(mat4(1), vec3(0, -4.0f, 0)) * rotate(mat4(1), theta, vec3(1, 0, 0)) * scale(mat4(1), vec3(1.5f, 1.5f, 1.5f));;
+			rocketBottom.model = model * rocketBottom.model;
+			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &rocketBottom.model[0][0]);
+			glBindVertexArray(rocketBottom.vao);
+			glDrawArrays(GL_TRIANGLES, 0, rocketBottom.size);
+			glBindVertexArray(0);
+			glFinish();
+
 			break;
 		case 4: 
-			cube.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0)) * scale(mat4(1), vec3(2,2,2));
-			glUniform1i(texHandle,cube.texID);
-			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &cube.model[0][0]);
-			glActiveTexture(GL_TEXTURE0 + cube.texID);
-			glBindTexture(GL_TEXTURE_2D, cube.texID);
-			glBindVertexArray(cube.vao);
-			glDrawArrays(GL_TRIANGLES, 0, cube.size);
+			texSphere.model = translate(mat4(1), vec3(0, 0, 0)) * rotate(mat4(1), theta, vec3(0, 1, 0)) * scale(mat4(1), vec3(2,2,2));
+			glUniform1i(texHandle, texSphere.texID);
+			glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &texSphere.model[0][0]);
+			glActiveTexture(GL_TEXTURE0 + texSphere.texID);
+			glBindTexture(GL_TEXTURE_2D, texSphere.texID);
+			glBindVertexArray(texSphere.vao);
+			glDrawArrays(GL_TRIANGLES, 0, texSphere.size);
 			glBindVertexArray(0);
 			glFinish();
 			break;
@@ -403,16 +477,25 @@ void handleInit() {
 
 void init() {
 	//Initialise objects
-	vector<Normal> object1 = generateSphere(radians(4.0f));
-	sphere = bufferInit(object1);
+	//Sphere object
+	vector<Normal> objectSphere = generateSphere(radians(4.0f));
+	vector<Normal> objectCube = generateCube();
+	vector<Normal> objectCone = generateCone(2.0f);
+	vector<Normal> objectCylinder = generateCylinder(2.0f);
 
-	sphere2 = bufferInit(object1);
-	sphere3 = bufferInit(object1);
-	sphere4 = bufferInit(object1);
+	//Sphere for part A and B
+	sphere = bufferInit(objectSphere);
 
-	vector<Normal> object2 = generateCube();
-	cube = bufferInit(object1);
-	cube.texID = loadTexture("texture/grass.bmp");
+	//Rocket for part C
+	rocketCone = bufferInit(objectCone);
+	rocketBody = bufferInit(objectCylinder);
+	rocketPayload = bufferInit(objectCube);
+	rocketBody2 = bufferInit(objectCylinder);
+	rocketBottom = bufferInit(objectCone);
+
+	//Sphere for part D
+	texSphere = bufferInit(objectSphere);
+	texSphere.texID = loadTexture("texture/sun.png");
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
