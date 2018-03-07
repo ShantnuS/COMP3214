@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="cw1shan.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cw1shan.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="opengl.h" />
+    <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader.frag" />
+    <None Include="shader.vert" />
+    <None Include="shader2.frag" />
+    <None Include="shader2.vert" />
+    <None Include="shader\shader4.frag" />
+    <None Include="shader\shader4.vert" />
+  </ItemGroup>
+</Project>
