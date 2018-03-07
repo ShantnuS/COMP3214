@@ -24,7 +24,7 @@ To run this coursework, [download the files here and run the executable](executa
 Coursework 2 is lab based and involves drawing rendering different things using a Raspberry Pi. 
   
 ### Part 1 ###  
-Part 1 of the lab (on 7th March 2018) involved implementing a new method of rendering a triangle which used Pineda's edge algorithm.
+Part 1 of the lab (on 7th March 2018) involved implementing a new method of rendering a triangle which used [Pineda's edge algorithm](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf).    
 My implementation [can be see here](cw2/rgl/Render.cpp). 
   
   
