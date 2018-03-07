@@ -18,3 +18,13 @@ Press **L** to toggle light direction rotation.
   
 Full specifications [are available here](spec/cw1.pdf).    
 To run this coursework, [download the files here and run the executable](executable/cw1).    
+  
+  
+## Coursework 2 ## 
+Coursework 2 is lab based and involves drawing rendering different things using a Raspberry Pi. 
+  
+### Part 1 ###  
+Part 1 of the lab (on 7th March 2018) involved implementing a new method of rendering a triangle which used Pineda's edge algorithm.
+My implementation [can be see here](cw2/rgl/Render.cpp). 
+  
+  
