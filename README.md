@@ -16,8 +16,8 @@ Press **L** to toggle light direction rotation.
 **D** = textured object.  
 ~~**E** = load and display a model.~~  
   
-Full specifications [are available here](spec/cw1.pdf).    
-To run this coursework, [download the files here and run the executable](executable/cw1).    
+Full specifications [are available here](res/spec/cw1.pdf).    
+To run this coursework, [download the files here and run the executable](res/executable/cw1).    
   
   
 ## Coursework 2 ## 
