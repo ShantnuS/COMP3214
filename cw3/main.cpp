@@ -3,7 +3,7 @@
 int main(void)
 {
 
-	cw1shan_main();
+	cw3shan_main();
 
 	getc(stdin);
 

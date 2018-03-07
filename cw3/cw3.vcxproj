@@ -153,12 +153,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cw1shan.cpp" />
+    <ClCompile Include="cw3shan.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cw1shan.h" />
+    <ClInclude Include="cw3shan.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="opengl.h" />
     <ClInclude Include="utils.h" />

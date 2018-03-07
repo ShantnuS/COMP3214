@@ -565,7 +565,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
-int cw1shan_main() {
+int cw3shan_main() {
 	currentScreen = 1;
 
 	glfwSetErrorCallback(error_callback);
