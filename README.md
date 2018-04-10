@@ -33,5 +33,5 @@ Full specifications [are available here](res/spec/cw2.pdf).
 ## Coursework P ## 
 Using the [Bullet Physics engine](https://github.com/bulletphysics/bullet3).  
 
-Full specifications [are available here](res/spec/cwP.pdf).  
-To run this coursework, [download the files here and run the executable](res/executable/cwP).      
+Full specifications [are available here](res/spec/cwp.pdf).  
+To run this coursework, [download the files here and run the executable](cwP).      
