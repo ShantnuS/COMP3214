@@ -14,7 +14,6 @@ Press **L** to toggle light direction rotation.
 **B** = shaded sphere.  
 **C** = draw rocket and have animations.  
 **D** = textured object.  
-~~**E** = load and display a model.~~  
   
 Full specifications [are available here](res/spec/cw1.pdf).    
 To run this coursework, [download the files here and run the executable](res/executable/cw1).    
@@ -28,6 +27,11 @@ Part 1 of the lab (on 7th March 2018) involved implementing a new method of rend
 My implementation [can be see here](cw2/rgl/Render.cpp). 
     
       
-Full specifications [are available here](res/spec/cw2.pdf).    
+Full specifications [are available here](res/spec/cw2.pdf).   
   
   
+## Coursework P ## 
+Using the [Bullet Physics engine](https://github.com/bulletphysics/bullet3).  
+
+Full specifications [are available here](res/spec/cwP.pdf).  
+To run this coursework, [download the files here and run the executable](res/executable/cwP).      

@@ -6,28 +6,29 @@ ifndef config
 endif
 export config
 
-PROJECTS := Physics
+PROJECTS := test
 
 .PHONY: all clean help $(PROJECTS)
 
 all: $(PROJECTS)
 
-Physics: 
-	@echo "==== Building Physics ($(config)) ===="
-	@${MAKE} --no-print-directory -C build/windows.gmake/Physics -f Makefile
+test: 
+	@echo "==== Building test ($(config)) ===="
+	@${MAKE} --no-print-directory -C . -f test.make
 
 clean:
-	@${MAKE} --no-print-directory -C build/windows.gmake/Physics -f Makefile clean
+	@${MAKE} --no-print-directory -C . -f test.make clean
 
 help:
 	@echo "Usage: make [config=name] [target]"
 	@echo ""
 	@echo "CONFIGURATIONS:"
 	@echo "   release"
+	@echo "   debug"
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default)"
 	@echo "   clean"
-	@echo "   Physics"
+	@echo "   test"
 	@echo ""
 	@echo "For more information, see http://industriousone.com/premake/quick-start"

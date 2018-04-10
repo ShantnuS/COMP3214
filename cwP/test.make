@@ -21,15 +21,37 @@ endif
 
 ifeq ($(config),release)
   OBJDIR     = obj/Release
-  TARGETDIR  = ../../../Physics
-  TARGET     = $(TARGETDIR)/Physics.exe
+  TARGETDIR  = .
+  TARGET     = $(TARGETDIR)/test.exe
   DEFINES   +=
-  INCLUDES  += -I../../../Physics/include -I../../../Physics -IC:/msys64/mingw64/include/bullet
+  INCLUDES  += -Iinclude -IC:/msys64/mingw64/include/bullet
   ALL_CPPFLAGS  += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS    += $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -Wno-write-strings -fpermissive
+  ALL_CFLAGS    += $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -Wwrite-strings -fpermissive -Wno-write-strings
   ALL_CXXFLAGS  += $(CXXFLAGS) $(ALL_CFLAGS)
   ALL_RESFLAGS  += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  ALL_LDFLAGS   += $(LDFLAGS) -L../../../lib -L. -s
+  ALL_LDFLAGS   += $(LDFLAGS) -L. -s
+  LDDEPS    +=
+  LIBS      += $(LDDEPS) -lglew32 -lglfw3 -lopengl32 -lBulletDynamics -lBulletCollision -lLinearMath
+  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(ALL_LDFLAGS) $(LIBS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+endif
+
+ifeq ($(config),debug)
+  OBJDIR     = obj/Debug
+  TARGETDIR  = .
+  TARGET     = $(TARGETDIR)/test.exe
+  DEFINES   +=
+  INCLUDES  += -Iinclude -IC:/msys64/mingw64/include/bullet
+  ALL_CPPFLAGS  += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS    += $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -Wwrite-strings -fpermissive -Wno-write-strings
+  ALL_CXXFLAGS  += $(CXXFLAGS) $(ALL_CFLAGS)
+  ALL_RESFLAGS  += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  ALL_LDFLAGS   += $(LDFLAGS) -L. -s
   LDDEPS    +=
   LIBS      += $(LDDEPS) -lglew32 -lglfw3 -lopengl32 -lBulletDynamics -lBulletCollision -lLinearMath
   LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(ALL_LDFLAGS) $(LIBS)
@@ -42,13 +64,13 @@ ifeq ($(config),release)
 endif
 
 OBJECTS := \
+	$(OBJDIR)/cwPshan.o \
 	$(OBJDIR)/glslprogram.o \
 	$(OBJDIR)/imgui.o \
 	$(OBJDIR)/imgui_demo.o \
 	$(OBJDIR)/imgui_draw.o \
 	$(OBJDIR)/imgui_impl_glfw_gl3.o \
 	$(OBJDIR)/imgui_orient.o \
-	$(OBJDIR)/PT3.o \
 	$(OBJDIR)/tiny_mesh.o \
 	$(OBJDIR)/tiny_obj_loader.o \
 	$(OBJDIR)/utils.o \
@@ -70,7 +92,7 @@ all: $(TARGETDIR) $(OBJDIR) prebuild prelink $(TARGET)
 	@:
 
 $(TARGET): $(GCH) $(OBJECTS) $(LDDEPS) $(RESOURCES)
-	@echo Linking Physics
+	@echo Linking test
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
 
@@ -91,7 +113,7 @@ else
 endif
 
 clean:
-	@echo Cleaning Physics
+	@echo Cleaning test
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
 	$(SILENT) rm -rf $(OBJDIR)
@@ -112,47 +134,47 @@ $(GCH): $(PCH)
 	$(SILENT) $(CXX) -x c++-header $(ALL_CXXFLAGS) -MMD -MP $(DEFINES) $(INCLUDES) -o "$@" -MF "$(@:%.gch=%.d)" -c "$<"
 endif
 
-$(OBJDIR)/glslprogram.o: ../../../Physics/glslprogram.cpp
+$(OBJDIR)/cwPshan.o: cwPshan.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/imgui.o: ../../../Physics/imgui.cpp
+$(OBJDIR)/glslprogram.o: glslprogram.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/imgui_demo.o: ../../../Physics/imgui_demo.cpp
+$(OBJDIR)/imgui.o: imgui.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/imgui_draw.o: ../../../Physics/imgui_draw.cpp
+$(OBJDIR)/imgui_demo.o: imgui_demo.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/imgui_impl_glfw_gl3.o: ../../../Physics/imgui_impl_glfw_gl3.cpp
+$(OBJDIR)/imgui_draw.o: imgui_draw.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/imgui_orient.o: ../../../Physics/imgui_orient.cpp
+$(OBJDIR)/imgui_impl_glfw_gl3.o: imgui_impl_glfw_gl3.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/PT3.o: ../../../Physics/PT3.cpp
+$(OBJDIR)/imgui_orient.o: imgui_orient.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/tiny_mesh.o: ../../../Physics/tiny_mesh.cpp
+$(OBJDIR)/tiny_mesh.o: tiny_mesh.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/tiny_obj_loader.o: ../../../Physics/tiny_obj_loader.cpp
+$(OBJDIR)/tiny_obj_loader.o: tiny_obj_loader.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/utils.o: ../../../Physics/utils.cpp
+$(OBJDIR)/utils.o: utils.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
-$(OBJDIR)/vertexbufferobject.o: ../../../Physics/vertexbufferobject.cpp
+$(OBJDIR)/vertexbufferobject.o: vertexbufferobject.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF $(@:%.o=%.d) -c "$<"
 
