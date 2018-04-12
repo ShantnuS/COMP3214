@@ -1,4 +1,4 @@
-#include <stdio.h>
+ #include <stdio.h>
 
 // OpenGL (GLFW/GLEW)
 #include <GL/glew.h>
@@ -20,10 +20,12 @@
 #define STB_IMAGE_IMPLEMENTATION // only define in one file
 #include <stb_image.h>
 
+//World header file
+#include "World.h"
 
 
-int main()
-{
+int main(){
 	printf("If you see this, the setup probably works. :)");
+	scanf("Hello");
 	return 0;
 }

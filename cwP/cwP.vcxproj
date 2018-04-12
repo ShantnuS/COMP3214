@@ -309,6 +309,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="World.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletCollisionCommon.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletDynamicsCommon.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btAxisSweep3.h" />

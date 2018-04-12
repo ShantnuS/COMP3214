@@ -1169,5 +1169,8 @@
     <ClInclude Include="include\tiny_object_loader\tiny_obj_loader.h">
       <Filter>Header Files\tiny_obj_loader</Filter>
     </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
