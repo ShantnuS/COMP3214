@@ -309,6 +309,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletCollisionCommon.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletDynamicsCommon.h" />
@@ -544,6 +545,10 @@
     <ClInclude Include="include\stb_image\stb_image_write.h" />
     <ClInclude Include="include\stb_image\stb_perlin.h" />
     <ClInclude Include="include\tiny_object_loader\tiny_obj_loader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader.frag" />
+    <None Include="shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
