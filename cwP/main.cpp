@@ -28,7 +28,26 @@
 //World header file
 #include "World.h"
 
+btBroadphaseInterface* broadphase;
+btDefaultCollisionConfiguration* collisionConfiguration;
+btCollisionDispatcher* dispatcher;
+btSequentialImpulseConstraintSolver* solver;
+btDiscreteDynamicsWorld* dynamicsWorld;
+
+std::vector<btRigidBody*> MovingBits; // so that can get at all bits
+std::vector<btRigidBody*> StaticBits; // especially during clean up.
+
+GLuint modelHandle;
+GLuint viewHandle;
+GLuint projectionHandle;
+GLuint lightHandle;
+GLuint texHandle;
+
 GLuint program;
+
+glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
+float zoom =10;
+float theta = 0.0f;
 
 struct Object {
 	GLuint vao;
@@ -36,6 +55,7 @@ struct Object {
 	int size;
 	glm::mat4 model;
 	GLuint texID;
+	glm::vec3 position;
 };
 
 struct Normal {
@@ -44,13 +64,17 @@ struct Normal {
 	glm::vec2 uv;
 };
 
+Object sphere1;
+Object sphere2;
+Object cube1;
+
 GLfloat cube_VB[] = {
-	-1.0f,-1.0f,-1.0f, // triangle 1 : begin
-	-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, // triangle 1 : end
-	1.0f, 1.0f,-1.0f, // triangle 2 : begin
 	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f, // triangle 2 : end
+	-1.0f,-1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, 
+	1.0f, 1.0f,-1.0f, 
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f,
 	1.0f,-1.0f, 1.0f,
 	-1.0f,-1.0f,-1.0f,
 	1.0f,-1.0f,-1.0f,
@@ -255,6 +279,221 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+
+	//Zoom
+	if ((key == GLFW_KEY_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		if (zoom > 0) {
+			zoom -= 0.1f;
+			printf("%f\n", zoom);
+		}
+	}
+	if ((key == GLFW_KEY_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		zoom += 0.1f;
+		printf("%f\n", zoom);
+	}
+
+}
+
+btRigidBody* SetSphere(float size, btTransform T) {
+	btCollisionShape* fallshape = new btSphereShape(size);
+	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
+	btScalar mass = 1;
+	btVector3 fallInertia(0, 0, 0);
+	fallshape->calculateLocalInertia(mass, fallInertia);
+	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
+	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
+	fallRigidBody->setLinearVelocity(btVector3(0, 0, 0));
+	fallRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(fallRigidBody);
+	return fallRigidBody;
+}
+
+btRigidBody* SetCube(float size, btTransform T) {
+	btCollisionShape* fallshape = new btSphereShape(size);
+	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
+	btScalar mass = 1;
+	btVector3 fallInertia(0, 0, 0);
+	fallshape->calculateLocalInertia(mass, fallInertia);
+	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
+	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
+	fallRigidBody->setLinearVelocity(btVector3(0, 0, 0));
+	fallRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(fallRigidBody);
+	return fallRigidBody;
+}
+
+void bullet_init() {
+	/*
+	* set up world
+	*/
+	broadphase = new btDbvtBroadphase();
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	solver = new btSequentialImpulseConstraintSolver;
+	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+	dynamicsWorld->setGravity(btVector3(0., GRAVITY, 0));
+	/*
+	* Set up ground
+	*/
+	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
+	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -10, 0)));
+	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+	groundRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(groundRigidBody);
+
+	/*
+	btCollisionShape* leftShape = new btStaticPlaneShape(btVector3(1, 0, 0), 1);
+	btDefaultMotionState* leftMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-10, 0, 0)));
+	btRigidBody::btRigidBodyConstructionInfo leftRigidBodyCI(0, leftMotionState, leftShape, btVector3(0, 0, 0));
+	btRigidBody* leftRigidBody = new btRigidBody(leftRigidBodyCI);
+	leftRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(leftRigidBody);
+	
+	btCollisionShape* rightShape = new btStaticPlaneShape(btVector3(-1, 0, 0), 1);
+	btDefaultMotionState* rightMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(10, 0, 0)));
+	btRigidBody::btRigidBodyConstructionInfo rightRigidBodyCI(0, rightMotionState, rightShape, btVector3(0, 0, 0));
+	btRigidBody* rightRigidBody = new btRigidBody(rightRigidBodyCI);
+	rightRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(rightRigidBody);
+	
+
+	btCollisionShape* topShape = new btStaticPlaneShape(btVector3(0, -1, 0), 1);
+	btDefaultMotionState* topMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
+	btRigidBody::btRigidBodyConstructionInfo topRigidBodyCI(0, topMotionState, topShape, btVector3(0, 0, 0));
+	btRigidBody* topRigidBody = new btRigidBody(topRigidBodyCI);
+	topRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(topRigidBody);
+	*/
+
+	//Sphere1
+	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 0, 1, 1), btVector3(0, 0, 0))));
+
+	/*
+	//Sphere2
+	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(-3, 0, 0))));
+	
+	//Cube1
+	MovingBits.push_back(SetCube(1., btTransform(btQuaternion(1, 0, 0, 1), btVector3(-5, 0, 0))));
+	*/
+}
+
+glm::vec3 bullet_step(int i) {
+	btTransform trans;
+	btRigidBody* moveRigidBody;
+	int n = MovingBits.size();
+	moveRigidBody = MovingBits[i];
+	dynamicsWorld->stepSimulation(1 / 60.f, 10);
+	//dynamicsWorld->stepSimulation(0.01, 5);
+	moveRigidBody->getMotionState()->getWorldTransform(trans);
+	return glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+}
+
+void bullet_close() {
+	/*
+	* This is very minimal and relies on OS to tidy up.
+	*/
+	btRigidBody* moveRigidBody;
+	moveRigidBody = MovingBits[0];
+	dynamicsWorld->removeRigidBody(moveRigidBody);
+	delete moveRigidBody->getMotionState();
+	delete moveRigidBody;
+	delete dynamicsWorld;
+	delete solver;
+	delete collisionConfiguration;
+	delete dispatcher;
+	delete broadphase;
+}
+
+Object bufferInit(std::vector<Normal> vp) {
+
+	Object myObj;
+	Normal* v = vp.data();
+	myObj.size = vp.size();
+
+	glGenVertexArrays(1, &myObj.vao);
+	glBindVertexArray(myObj.vao);
+
+	glGenBuffers(1, &myObj.vert_b);
+
+	glBindBuffer(GL_ARRAY_BUFFER, myObj.vert_b);
+	glBufferData(GL_ARRAY_BUFFER, vp.size() * sizeof(struct Normal), v, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct Normal), (GLvoid*)offsetof(struct Normal, direction));
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(struct Normal), (GLvoid*)offsetof(struct Normal, normal));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Normal), (GLvoid*)offsetof(struct Normal, uv));
+	glEnableVertexAttribArray(2);
+
+	glBindVertexArray(0);
+	return myObj;
+}
+
+void handleInit() {
+	modelHandle = glGetUniformLocation(program, "model");
+	viewHandle = glGetUniformLocation(program, "view");
+	projectionHandle = glGetUniformLocation(program, "projection");
+	lightHandle = glGetUniformLocation(program, "lightDirection");
+	texHandle = glGetUniformLocation(program, "tex");
+}
+
+void init() {
+	//Initialise objects
+	//Sphere object
+	std::vector<Normal> objectSphere = generateSphere(glm::radians(4.0f));
+	std::vector<Normal> objectCube = generateCube();
+
+	//Spheres and cubes init
+	sphere1 = bufferInit(objectSphere);
+	sphere2 = bufferInit(objectSphere);
+	cube1 = bufferInit(objectCube);
+
+	sphere1.position = glm::vec3(0, 0, 0);
+	sphere2.position = glm::vec3(0, 0, 0);
+	cube1.position = glm::vec3(0, 0, 0);
+
+}
+
+void draw() {
+	glm::mat4 view = glm::lookAt(glm::vec3(zoom, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100.0f);
+
+	glUniformMatrix4fv(viewHandle, 1, GL_FALSE, &view[0][0]);
+	glUniformMatrix4fv(projectionHandle, 1, GL_FALSE, &projection[0][0]);
+	glUniform3f(lightHandle, lightDirection.x, lightDirection.y, lightDirection.z);
+
+	//use bullet to move shapes
+	sphere1.position = bullet_step(0);
+	//sphere2.position = bullet_step(1);
+	//cube1.position = bullet_step(2);
+
+	//printf("%f\n",sphere1.position.x);
+
+	sphere1.model = glm::translate(glm::mat4(1), sphere1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere1.model[0][0]);
+	glBindVertexArray(sphere1.vao);
+	glDrawArrays(GL_TRIANGLES, 0, sphere1.size);
+	glBindVertexArray(0);
+	glFinish();
+
+	/*
+	sphere2.model = glm::translate(glm::mat4(1), sphere2.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere2.model[0][0]);
+	glBindVertexArray(sphere2.vao);
+	glDrawArrays(GL_TRIANGLES, 0, sphere2.size);
+	glBindVertexArray(0);
+	glFinish();
+
+	cube1.model = glm::translate(glm::mat4(1), cube1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &cube1.model[0][0]);
+	glBindVertexArray(cube1.vao);
+	glDrawArrays(GL_TRIANGLES, 0, cube1.size);
+	glBindVertexArray(0);
+	glFinish();
+	*/
 }
 
 int main(){
@@ -277,8 +516,10 @@ int main(){
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	//handleInit();
-	//init();
+	bullet_init();
+
+	handleInit();
+	init();
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -289,13 +530,15 @@ int main(){
 	while (!glfwWindowShouldClose(window)) {
 		glUseProgram(program);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//draw();
+
+		draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
+	bullet_close();
 
 	return 0;
 }
