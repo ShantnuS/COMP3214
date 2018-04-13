@@ -11,8 +11,8 @@ uniform vec3 lightDirection;
 
 void main(){
 	vec3 ambient = ambientColor; 
-	vec3 diffuse = clamp(dot(normals, lightDirection), 0 , 1) * diffuseColor;
-	vec3 resultColor = color * (diffuse + ambient);
-	
-	gl_FragColor = vec4(resultColor,1);
+	//vec3 diffuse = clamp(dot(normals, lightDirection), 0 , 1) * diffuseColor;
+	//vec3 resultColor = color * (diffuse + ambient);
+	gl_FragColor = vec4(color,1);
+	//gl_FragColor = vec4(resultColor,1);
 }

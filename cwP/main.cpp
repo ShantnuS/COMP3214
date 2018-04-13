@@ -45,8 +45,8 @@ GLuint texHandle;
 
 GLuint program;
 
-glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
-float zoom =10;
+glm::vec3 lightDirection = glm::vec3(0.0f, 0.0f, 0.0f);
+float zoom =20;
 float theta = 0.0f;
 
 struct Object {
@@ -302,14 +302,14 @@ btRigidBody* SetSphere(float size, btTransform T) {
 	fallshape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
 	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(btVector3(0, 0, 0));
+	fallRigidBody->setLinearVelocity(btVector3(0, -1, -1));
 	fallRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(fallRigidBody);
 	return fallRigidBody;
 }
 
-btRigidBody* SetCube(float size, btTransform T) {
-	btCollisionShape* fallshape = new btSphereShape(size);
+btRigidBody* SetCube(btVector3 size, btTransform T) {
+	btCollisionShape* fallshape = new btBoxShape(size);
 	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
 	btScalar mass = 1;
 	btVector3 fallInertia(0, 0, 0);
@@ -323,18 +323,15 @@ btRigidBody* SetCube(float size, btTransform T) {
 }
 
 void bullet_init() {
-	/*
-	* set up world
-	*/
+	//CREATE THE WORLD
 	broadphase = new btDbvtBroadphase();
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
 	solver = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 	dynamicsWorld->setGravity(btVector3(0., GRAVITY, 0));
-	/*
-	* Set up ground
-	*/
+	
+	//GROUND (BOTTOM)
 	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
 	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -10, 0)));
 	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
@@ -342,40 +339,58 @@ void bullet_init() {
 	groundRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(groundRigidBody);
 
-	/*
-	btCollisionShape* leftShape = new btStaticPlaneShape(btVector3(1, 0, 0), 1);
-	btDefaultMotionState* leftMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-10, 0, 0)));
-	btRigidBody::btRigidBodyConstructionInfo leftRigidBodyCI(0, leftMotionState, leftShape, btVector3(0, 0, 0));
-	btRigidBody* leftRigidBody = new btRigidBody(leftRigidBodyCI);
-	leftRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(leftRigidBody);
-	
-	btCollisionShape* rightShape = new btStaticPlaneShape(btVector3(-1, 0, 0), 1);
-	btDefaultMotionState* rightMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(10, 0, 0)));
-	btRigidBody::btRigidBodyConstructionInfo rightRigidBodyCI(0, rightMotionState, rightShape, btVector3(0, 0, 0));
-	btRigidBody* rightRigidBody = new btRigidBody(rightRigidBodyCI);
-	rightRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(rightRigidBody);
-	
-
+	//TOP (CEILING)
 	btCollisionShape* topShape = new btStaticPlaneShape(btVector3(0, -1, 0), 1);
 	btDefaultMotionState* topMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
 	btRigidBody::btRigidBodyConstructionInfo topRigidBodyCI(0, topMotionState, topShape, btVector3(0, 0, 0));
 	btRigidBody* topRigidBody = new btRigidBody(topRigidBodyCI);
 	topRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(topRigidBody);
-	*/
+	
+	//BACK
+	btCollisionShape* backShape = new btStaticPlaneShape(btVector3(1, 0, 0), 1);
+	btDefaultMotionState* backMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-10, 0, 0)));
+	btRigidBody::btRigidBodyConstructionInfo backRigidBodyCI(0, backMotionState, backShape, btVector3(0, 0, 0));
+	btRigidBody* backRigidBody = new btRigidBody(backRigidBodyCI);
+	backRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(backRigidBody);
+	
+	//FRONT
+	btCollisionShape* frontShape = new btStaticPlaneShape(btVector3(-1, 0, 0), 1);
+	btDefaultMotionState* frontMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(10, 0, 0)));
+	btRigidBody::btRigidBodyConstructionInfo frontRigidBodyCI(0, frontMotionState, frontShape, btVector3(0, 0, 0));
+	btRigidBody* frontRigidBody = new btRigidBody(frontRigidBodyCI);
+	frontRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(frontRigidBody);
+	
+	//LEFT
+	btCollisionShape* leftShape = new btStaticPlaneShape(btVector3(0, 0, 1), 1);
+	btDefaultMotionState* leftMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, -10)));
+	btRigidBody::btRigidBodyConstructionInfo leftRigidBodyCI(0, leftMotionState, leftShape, btVector3(0, 0, 0));
+	btRigidBody* leftRigidBody = new btRigidBody(leftRigidBodyCI);
+	leftRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(leftRigidBody);
+
+	//RIGHT
+	btCollisionShape* rightShape = new btStaticPlaneShape(btVector3(0, 0, -1), 1);
+	btDefaultMotionState* rightMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 10)));
+	btRigidBody::btRigidBodyConstructionInfo rightRigidBodyCI(0, rightMotionState, rightShape, btVector3(0, 0, 0));
+	btRigidBody* rightRigidBody = new btRigidBody(rightRigidBodyCI);
+	rightRigidBody->setRestitution(COE);
+	dynamicsWorld->addRigidBody(rightRigidBody);
+	
 
 	//Sphere1
 	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 0, 1, 1), btVector3(0, 0, 0))));
 
-	/*
+	
 	//Sphere2
-	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(-3, 0, 0))));
+	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0))));
+	
 	
 	//Cube1
-	MovingBits.push_back(SetCube(1., btTransform(btQuaternion(1, 0, 0, 1), btVector3(-5, 0, 0))));
-	*/
+	MovingBits.push_back(SetCube(btVector3(1, 1, 1), btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 0))));
+	
 }
 
 glm::vec3 bullet_step(int i) {
@@ -383,7 +398,7 @@ glm::vec3 bullet_step(int i) {
 	btRigidBody* moveRigidBody;
 	int n = MovingBits.size();
 	moveRigidBody = MovingBits[i];
-	dynamicsWorld->stepSimulation(1 / 60.f, 10);
+	dynamicsWorld->stepSimulation(1 / 200.f, 10);
 	//dynamicsWorld->stepSimulation(0.01, 5);
 	moveRigidBody->getMotionState()->getWorldTransform(trans);
 	return glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
@@ -467,8 +482,8 @@ void draw() {
 
 	//use bullet to move shapes
 	sphere1.position = bullet_step(0);
-	//sphere2.position = bullet_step(1);
-	//cube1.position = bullet_step(2);
+	sphere2.position = bullet_step(1);
+	cube1.position = bullet_step(2);
 
 	//printf("%f\n",sphere1.position.x);
 
@@ -479,7 +494,6 @@ void draw() {
 	glBindVertexArray(0);
 	glFinish();
 
-	/*
 	sphere2.model = glm::translate(glm::mat4(1), sphere2.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere2.model[0][0]);
 	glBindVertexArray(sphere2.vao);
@@ -487,13 +501,14 @@ void draw() {
 	glBindVertexArray(0);
 	glFinish();
 
+	
 	cube1.model = glm::translate(glm::mat4(1), cube1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &cube1.model[0][0]);
 	glBindVertexArray(cube1.vao);
 	glDrawArrays(GL_TRIANGLES, 0, cube1.size);
 	glBindVertexArray(0);
 	glFinish();
-	*/
+	
 }
 
 int main(){
@@ -528,6 +543,7 @@ int main(){
 	glEnable(GL_CULL_FACE);
 
 	while (!glfwWindowShouldClose(window)) {
+		
 		glUseProgram(program);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

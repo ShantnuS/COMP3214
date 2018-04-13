@@ -20,5 +20,5 @@ void main(){
 	normals = tempVec.xyz;
 
 	gl_Position = projection * view * model * vec4(modelDirections,1); //since matrices multiply backwards
-	color = vec3(0.0f,0.0f,1.0f);
+	color = vec3(0.5f,0.3f,0.3f);
 }

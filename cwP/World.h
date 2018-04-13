@@ -1,7 +1,7 @@
 /*
 * simulation parameters
 */
-#define GRAVITY -0.4
+#define GRAVITY -10
 /*
 *Defined in the z direction
 */
