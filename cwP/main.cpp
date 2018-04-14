@@ -46,7 +46,7 @@ GLuint texHandle;
 GLuint program;
 
 glm::vec3 lightDirection = glm::vec3(0.0f, 0.0f, 0.0f);
-float zoom =20;
+float zoom = WORLDSIZE * 2;
 float theta = 0.0f;
 
 struct Object {
@@ -67,6 +67,7 @@ struct Normal {
 Object sphere1;
 Object sphere2;
 Object cube1;
+Object boundaryCube;
 
 GLfloat cube_VB[] = {
 	-1.0f,-1.0f,-1.0f,
@@ -302,7 +303,7 @@ btRigidBody* SetSphere(float size, btTransform T) {
 	fallshape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
 	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(btVector3(0, -1, -1));
+	fallRigidBody->setLinearVelocity(btVector3(-4, -50, -1));
 	fallRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(fallRigidBody);
 	return fallRigidBody;
@@ -316,7 +317,7 @@ btRigidBody* SetCube(btVector3 size, btTransform T) {
 	fallshape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
 	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(btVector3(0, 0, 0));
+	fallRigidBody->setLinearVelocity(btVector3(0, -5, 0));
 	fallRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(fallRigidBody);
 	return fallRigidBody;
@@ -333,7 +334,7 @@ void bullet_init() {
 	
 	//GROUND (BOTTOM)
 	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
-	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -10, 0)));
+	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -WORLDSIZE, 0)));
 	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
 	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
 	groundRigidBody->setRestitution(COE);
@@ -341,7 +342,7 @@ void bullet_init() {
 
 	//TOP (CEILING)
 	btCollisionShape* topShape = new btStaticPlaneShape(btVector3(0, -1, 0), 1);
-	btDefaultMotionState* topMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 10, 0)));
+	btDefaultMotionState* topMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, WORLDSIZE, 0)));
 	btRigidBody::btRigidBodyConstructionInfo topRigidBodyCI(0, topMotionState, topShape, btVector3(0, 0, 0));
 	btRigidBody* topRigidBody = new btRigidBody(topRigidBodyCI);
 	topRigidBody->setRestitution(COE);
@@ -349,7 +350,7 @@ void bullet_init() {
 	
 	//BACK
 	btCollisionShape* backShape = new btStaticPlaneShape(btVector3(1, 0, 0), 1);
-	btDefaultMotionState* backMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-10, 0, 0)));
+	btDefaultMotionState* backMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-WORLDSIZE, 0, 0)));
 	btRigidBody::btRigidBodyConstructionInfo backRigidBodyCI(0, backMotionState, backShape, btVector3(0, 0, 0));
 	btRigidBody* backRigidBody = new btRigidBody(backRigidBodyCI);
 	backRigidBody->setRestitution(COE);
@@ -357,7 +358,7 @@ void bullet_init() {
 	
 	//FRONT
 	btCollisionShape* frontShape = new btStaticPlaneShape(btVector3(-1, 0, 0), 1);
-	btDefaultMotionState* frontMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(10, 0, 0)));
+	btDefaultMotionState* frontMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(WORLDSIZE, 0, 0)));
 	btRigidBody::btRigidBodyConstructionInfo frontRigidBodyCI(0, frontMotionState, frontShape, btVector3(0, 0, 0));
 	btRigidBody* frontRigidBody = new btRigidBody(frontRigidBodyCI);
 	frontRigidBody->setRestitution(COE);
@@ -365,7 +366,7 @@ void bullet_init() {
 	
 	//LEFT
 	btCollisionShape* leftShape = new btStaticPlaneShape(btVector3(0, 0, 1), 1);
-	btDefaultMotionState* leftMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, -10)));
+	btDefaultMotionState* leftMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, -WORLDSIZE)));
 	btRigidBody::btRigidBodyConstructionInfo leftRigidBodyCI(0, leftMotionState, leftShape, btVector3(0, 0, 0));
 	btRigidBody* leftRigidBody = new btRigidBody(leftRigidBodyCI);
 	leftRigidBody->setRestitution(COE);
@@ -373,7 +374,7 @@ void bullet_init() {
 
 	//RIGHT
 	btCollisionShape* rightShape = new btStaticPlaneShape(btVector3(0, 0, -1), 1);
-	btDefaultMotionState* rightMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 10)));
+	btDefaultMotionState* rightMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, WORLDSIZE)));
 	btRigidBody::btRigidBodyConstructionInfo rightRigidBodyCI(0, rightMotionState, rightShape, btVector3(0, 0, 0));
 	btRigidBody* rightRigidBody = new btRigidBody(rightRigidBodyCI);
 	rightRigidBody->setRestitution(COE);
@@ -465,10 +466,12 @@ void init() {
 	sphere1 = bufferInit(objectSphere);
 	sphere2 = bufferInit(objectSphere);
 	cube1 = bufferInit(objectCube);
+	boundaryCube = bufferInit(objectCube);
 
 	sphere1.position = glm::vec3(0, 0, 0);
 	sphere2.position = glm::vec3(0, 0, 0);
 	cube1.position = glm::vec3(0, 0, 0);
+	boundaryCube.position= glm::vec3(0, 0, 0);
 
 }
 
@@ -486,6 +489,13 @@ void draw() {
 	cube1.position = bullet_step(2);
 
 	//printf("%f\n",sphere1.position.x);
+
+	boundaryCube.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*8/10, WORLDSIZE, WORLDSIZE));;
+	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &boundaryCube.model[0][0]);
+	glBindVertexArray(boundaryCube.vao);
+	glDrawArrays(GL_LINE_LOOP, 0, boundaryCube.size);
+	glBindVertexArray(0);
+	glFinish();
 
 	sphere1.model = glm::translate(glm::mat4(1), sphere1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere1.model[0][0]);
