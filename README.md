@@ -40,4 +40,4 @@ Using the [Bullet Physics engine](https://github.com/bulletphysics/bullet3).
 [Source files here](cwP).    
     
 Full specifications [are available here](res/spec/cwp.pdf).  
-To run this coursework, [download the files here and run the executable](cwP).      
+To run this coursework, [download the files here and run the executable](res/executable/cwP).      
