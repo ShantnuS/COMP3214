@@ -18,7 +18,6 @@ Press **L** to toggle light direction rotation.
 **D** = textured object.  
   
 Full specifications [are available here](res/spec/cw1.pdf).    
-To run this coursework, [download the files here and run the executable](res/executable/cw1).    
   
   
 ## Coursework 2 ## 
@@ -44,5 +43,4 @@ Using the [Bullet Physics engine](https://github.com/bulletphysics/bullet3).
     
 [Source files here](cwP).    
     
-Full specifications [are available here](res/spec/cwp.pdf).  
-To run this coursework, [download the files here and run the executable](res/executable/cwP).      
+Full specifications [are available here](res/spec/cwp.pdf).      
