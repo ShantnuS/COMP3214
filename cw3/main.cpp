@@ -316,39 +316,6 @@ void bullet_init() {
 	btRigidBody* topRigidBody = new btRigidBody(topRigidBodyCI);
 	topRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(topRigidBody);
-	
-	//BACK
-	btCollisionShape* backShape = new btStaticPlaneShape(btVector3(1, 0, 0), 1);
-	btDefaultMotionState* backMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-WORLDSIZE, 0, 0)));
-	btRigidBody::btRigidBodyConstructionInfo backRigidBodyCI(0, backMotionState, backShape, btVector3(0, 0, 0));
-	btRigidBody* backRigidBody = new btRigidBody(backRigidBodyCI);
-	backRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(backRigidBody);
-	
-	//FRONT
-	btCollisionShape* frontShape = new btStaticPlaneShape(btVector3(-1, 0, 0), 1);
-	btDefaultMotionState* frontMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(WORLDSIZE, 0, 0)));
-	btRigidBody::btRigidBodyConstructionInfo frontRigidBodyCI(0, frontMotionState, frontShape, btVector3(0, 0, 0));
-	btRigidBody* frontRigidBody = new btRigidBody(frontRigidBodyCI);
-	frontRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(frontRigidBody);
-	
-	//LEFT
-	btCollisionShape* leftShape = new btStaticPlaneShape(btVector3(0, 0, 1), 1);
-	btDefaultMotionState* leftMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, -WORLDSIZE)));
-	btRigidBody::btRigidBodyConstructionInfo leftRigidBodyCI(0, leftMotionState, leftShape, btVector3(0, 0, 0));
-	btRigidBody* leftRigidBody = new btRigidBody(leftRigidBodyCI);
-	leftRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(leftRigidBody);
-
-	//RIGHT
-	btCollisionShape* rightShape = new btStaticPlaneShape(btVector3(0, 0, -1), 1);
-	btDefaultMotionState* rightMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, WORLDSIZE)));
-	btRigidBody::btRigidBodyConstructionInfo rightRigidBodyCI(0, rightMotionState, rightShape, btVector3(0, 0, 0));
-	btRigidBody* rightRigidBody = new btRigidBody(rightRigidBodyCI);
-	rightRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(rightRigidBody);
-	
 
 	//Sphere1
 	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 0, 1, 1), btVector3(0, 0, 0))));
@@ -459,12 +426,12 @@ void draw() {
 
 	//printf("%f\n",sphere1.position.x);
 
-	boundaryCube.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*8/10, WORLDSIZE, WORLDSIZE));;
-	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &boundaryCube.model[0][0]);
-	glBindVertexArray(boundaryCube.vao);
-	glDrawArrays(GL_LINE_LOOP, 0, boundaryCube.size);
-	glBindVertexArray(0);
-	glFinish();
+	//boundaryCube.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*8/10, WORLDSIZE, WORLDSIZE));;
+	//glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &boundaryCube.model[0][0]);
+	//glBindVertexArray(boundaryCube.vao);
+	//glDrawArrays(GL_LINE_LOOP, 0, boundaryCube.size);
+	//glBindVertexArray(0);
+	//glFinish();
 
 	sphere1.model = glm::translate(glm::mat4(1), sphere1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere1.model[0][0]);
