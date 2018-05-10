@@ -26,7 +26,7 @@ GLuint texHandle;
 GLuint program;
 
 //Camera 
-glm::vec3 lightDirection = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 float zoom = WORLDSIZE * 2;
 float theta = 0.0f;
 
@@ -54,101 +54,6 @@ Object boundaryCube;
 static void error_callback(int error, const char* description) {
 	fputs(description, stderr);
 	_fgetchar();
-}
-
-GLuint LoadShader(const char * vertex_file_path, const char * fragment_file_path) {
-
-	// Create the shaders
-	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// Read the Vertex Shader code from the file
-	std::string VertexShaderCode;
-	std::ifstream VertexShaderStream(vertex_file_path, std::ios::in);
-	if (VertexShaderStream.is_open()) {
-		std::string Line = "";
-		while (getline(VertexShaderStream, Line))
-			VertexShaderCode += "\n" + Line;
-		VertexShaderStream.close();
-	}
-	else {
-		printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", vertex_file_path);
-		getchar();
-		return 0;
-	}
-
-	// Read the Fragment Shader code from the file
-	std::string FragmentShaderCode;
-	std::ifstream FragmentShaderStream(fragment_file_path, std::ios::in);
-	if (FragmentShaderStream.is_open()) {
-		std::string Line = "";
-		while (getline(FragmentShaderStream, Line))
-			FragmentShaderCode += "\n" + Line;
-		FragmentShaderStream.close();
-	}
-
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
-
-
-	// Compile Vertex Shader
-	printf("Compiling shader : %s\n", vertex_file_path);
-	char const * VertexSourcePointer = VertexShaderCode.c_str();
-	glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
-	glCompileShader(VertexShaderID);
-
-	// Check Vertex Shader
-	glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0) {
-		std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-		glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		printf("%s\n", &VertexShaderErrorMessage[0]);
-	}
-
-
-
-	// Compile Fragment Shader
-	printf("Compiling shader : %s\n", fragment_file_path);
-	char const * FragmentSourcePointer = FragmentShaderCode.c_str();
-	glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
-	glCompileShader(FragmentShaderID);
-
-	// Check Fragment Shader
-	glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0) {
-		std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-		printf("%s\n", &FragmentShaderErrorMessage[0]);
-	}
-
-
-
-	// Link the program
-	printf("Linking program\n");
-	GLuint ProgramID = glCreateProgram();
-	glAttachShader(ProgramID, VertexShaderID);
-	glAttachShader(ProgramID, FragmentShaderID);
-	glLinkProgram(ProgramID);
-
-	// Check the program
-	glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
-	glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0) {
-		std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		printf("%s\n", &ProgramErrorMessage[0]);
-	}
-
-
-	glDetachShader(ProgramID, VertexShaderID);
-	glDetachShader(ProgramID, FragmentShaderID);
-
-	glDeleteShader(VertexShaderID);
-	glDeleteShader(FragmentShaderID);
-
-	return ProgramID;
 }
 
 glm::vec2 getPolar(glm::vec3 v){
@@ -264,7 +169,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
-btRigidBody* SetSphere(float size, btTransform T) {
+btRigidBody* SetSphere(float size, btTransform T, btVector3 velocity) {
 	btCollisionShape* fallshape = new btSphereShape(size);
 	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
 	btScalar mass = 1;
@@ -272,13 +177,13 @@ btRigidBody* SetSphere(float size, btTransform T) {
 	fallshape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
 	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(btVector3(-4, -50, -1));
+	fallRigidBody->setLinearVelocity(velocity);
 	fallRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(fallRigidBody);
 	return fallRigidBody;
 }
 
-btRigidBody* SetCube(btVector3 size, btTransform T) {
+btRigidBody* SetCube(btVector3 size, btTransform T, btVector3 velocity) {
 	btCollisionShape* fallshape = new btBoxShape(size);
 	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
 	btScalar mass = 1;
@@ -286,7 +191,7 @@ btRigidBody* SetCube(btVector3 size, btTransform T) {
 	fallshape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
 	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(btVector3(0, -5, 0));
+	fallRigidBody->setLinearVelocity(velocity);
 	fallRigidBody->setRestitution(COE);
 	dynamicsWorld->addRigidBody(fallRigidBody);
 	return fallRigidBody;
@@ -318,15 +223,15 @@ void bullet_init() {
 	dynamicsWorld->addRigidBody(topRigidBody);
 
 	//Sphere1
-	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 0, 1, 1), btVector3(0, 0, 0))));
+	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 0, 1, 1), btVector3(0, 0, 0)), btVector3(0, -1, 0)));
 
 	
 	//Sphere2
-	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0))));
+	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0)), btVector3(0, -1, 0)));
 	
 	
 	//Cube1
-	MovingBits.push_back(SetCube(btVector3(1, 1, 1), btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 0))));
+	MovingBits.push_back(SetCube(btVector3(1, 1, 1), btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 0)), btVector3(0, -1, 0)));
 	
 }
 
@@ -404,11 +309,32 @@ void init() {
 	cube1 = bufferInit(objectCube);
 	boundaryCube = bufferInit(objectCube);
 
+	//Textures 
+	sphere1.texID = loadTexture("texture/sun.png");
+	sphere2.texID = loadTexture("texture/sun.png");
+	cube1.texID = loadTexture("texture/stones.bmp");
+
 	sphere1.position = glm::vec3(0, 0, 0);
 	sphere2.position = glm::vec3(0, 0, 0);
 	cube1.position = glm::vec3(0, 0, 0);
 	boundaryCube.position= glm::vec3(0, 0, 0);
 
+}
+
+void drawObject(Object object) {
+	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &object.model[0][0]);
+
+	glUniform1i(texHandle, object.texID);
+	glActiveTexture(GL_TEXTURE0 + object.texID);
+	glBindTexture(GL_TEXTURE_2D, object.texID);
+
+	glBindVertexArray(object.vao);
+	glDrawArrays(GL_TRIANGLES, 0, object.size);
+	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0 + object.texID);
+	glBindTexture(GL_TEXTURE_2D, GL_TEXTURE0);
+	glFinish();
 }
 
 void draw() {
@@ -434,26 +360,14 @@ void draw() {
 	//glFinish();
 
 	sphere1.model = glm::translate(glm::mat4(1), sphere1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere1.model[0][0]);
-	glBindVertexArray(sphere1.vao);
-	glDrawArrays(GL_TRIANGLES, 0, sphere1.size);
-	glBindVertexArray(0);
-	glFinish();
+	drawObject(sphere1);
 
 	sphere2.model = glm::translate(glm::mat4(1), sphere2.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &sphere2.model[0][0]);
-	glBindVertexArray(sphere2.vao);
-	glDrawArrays(GL_TRIANGLES, 0, sphere2.size);
-	glBindVertexArray(0);
-	glFinish();
+	drawObject(sphere2);
 
 	
 	cube1.model = glm::translate(glm::mat4(1), cube1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &cube1.model[0][0]);
-	glBindVertexArray(cube1.vao);
-	glDrawArrays(GL_TRIANGLES, 0, cube1.size);
-	glBindVertexArray(0);
-	glFinish();
+	drawObject(cube1);
 	
 }
 

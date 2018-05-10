@@ -9,7 +9,7 @@
 /*
 * Coefficient of restitution.
 */
-#define WORLDSIZE 30
+#define WORLDSIZE 10
 /*
 * Size of the planes
 */
