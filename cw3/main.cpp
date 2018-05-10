@@ -1,54 +1,36 @@
-//Coursework P - Shantnu Singh 
+//Coursework 3 - Shantnu Singh 
 
-//Basics 
-#include <stdio.h>
-#include <fstream>
-#include <sstream>
-
-// OpenGL (GLFW/GLEW)
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-// GLM (basics)
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-// Bullet Physics (basics)
-#include <btBulletDynamicsCommon.h>
-
-// tiny_obj_loader
-#define TINYOBJLOADER_IMPLEMENTATION // only define in one file
-#include <tiny_obj_loader.h>
-
-// stb_image
-#define STB_IMAGE_IMPLEMENTATION // only define in one file
-#include <stb_image.h>
-
-//World header file
+//Header files
+#include "mylibs.h"
 #include "World.h"
 
+//Bullet Physics 
 btBroadphaseInterface* broadphase;
 btDefaultCollisionConfiguration* collisionConfiguration;
 btCollisionDispatcher* dispatcher;
 btSequentialImpulseConstraintSolver* solver;
 btDiscreteDynamicsWorld* dynamicsWorld;
 
+//Moving items and static items
 std::vector<btRigidBody*> MovingBits; // so that can get at all bits
 std::vector<btRigidBody*> StaticBits; // especially during clean up.
 
+//Handles 
 GLuint modelHandle;
 GLuint viewHandle;
 GLuint projectionHandle;
 GLuint lightHandle;
 GLuint texHandle;
 
+//Programs 
 GLuint program;
 
+//Camera 
 glm::vec3 lightDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 float zoom = WORLDSIZE * 2;
 float theta = 0.0f;
 
+//Structs 
 struct Object {
 	GLuint vao;
 	GLuint vert_b;
@@ -57,56 +39,17 @@ struct Object {
 	GLuint texID;
 	glm::vec3 position;
 };
-
 struct Normal {
 	glm::vec3 normal;
 	glm::vec3 direction;
 	glm::vec2 uv;
 };
 
+//Objects 
 Object sphere1;
 Object sphere2;
 Object cube1;
 Object boundaryCube;
-
-GLfloat cube_VB[] = {
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 
-	1.0f, 1.0f,-1.0f, 
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f
-};
 
 static void error_callback(int error, const char* description) {
 	fputs(description, stderr);
@@ -281,7 +224,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
-	//Zoom
+	//Camera controls
 	if ((key == GLFW_KEY_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		if (zoom > 0) {
 			zoom -= 0.1f;
@@ -292,7 +235,33 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		zoom += 0.1f;
 		printf("%f\n", zoom);
 	}
+	if ((key == GLFW_KEY_LEFT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Turn camera to left 
+	}
+	if ((key == GLFW_KEY_RIGHT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Turn camera to right 
+	}
 
+
+	//Other controls
+	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
+		//Camera to picture location
+	} 
+	if ((key == GLFW_KEY_L) && action == GLFW_PRESS) {
+		//Camera to other location 1
+	}
+	if ((key == GLFW_KEY_O) && action == GLFW_PRESS) {
+		//Camera to other location 2
+	}
+	if ((key == GLFW_KEY_T) && action == GLFW_PRESS) {
+		//Start tour
+	}
+	if ((key == GLFW_KEY_G) && action == GLFW_PRESS) {
+		//Exit tour
+	}
+	if ((key == GLFW_KEY_H) && action == GLFW_PRESS) {
+		//Display help on screen out printed on console
+	}
 }
 
 btRigidBody* SetSphere(float size, btTransform T) {

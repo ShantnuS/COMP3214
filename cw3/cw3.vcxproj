@@ -309,6 +309,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="mylibs.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletCollisionCommon.h" />
