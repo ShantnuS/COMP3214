@@ -21,15 +21,13 @@ Full specifications [are available here](res/spec/cw1.pdf).
   
   
 ## Coursework 2 ## 
-Coursework 2 is lab based and involves drawing rendering different things using a Raspberry Pi.   
+Rendering different things using a Raspberry Pi.   
     
 [Source files here](cw2).    
     
 ### Part 1 ###  
 Part 1 of the lab (on 7th March 2018) involved implementing a new method of rendering a triangle which used [Pineda's edge algorithm](https://www.cs.drexel.edu/~david/Classes/Papers/comp175-06-pineda.pdf).    
-My implementation [can be see here](cw2/Lab1/rgl/Render.cpp). 
-  
-    
+My implementation [can be see here](cw2/Lab1/rgl/Render.cpp).    
     
 ### Part 2 ###      
 Part 2 of the lab (on 2nd May 2018) involved implementing a Z-Buffer and create a shaded cube using the Gouraud Shader.  
@@ -44,3 +42,11 @@ Using the [Bullet Physics engine](https://github.com/bulletphysics/bullet3).
 [Source files here](cwP).    
     
 Full specifications [are available here](res/spec/cwp.pdf).      
+    
+	
+## Coursework 3 ## 
+Create a custom scene using OpenGL with a camera tour. The theme is SPACE!  
+  
+[Source files here](cw3).   
+  
+Full specifications [are available here](res/spec/cw3.pdf).  
