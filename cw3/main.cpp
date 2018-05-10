@@ -51,6 +51,8 @@ Object sphere2;
 Object cube1;
 Object boundaryCube;
 
+GLuint backgroundTex;
+
 static void error_callback(int error, const char* description) {
 	fputs(description, stderr);
 	_fgetchar();
@@ -321,21 +323,29 @@ void init() {
 
 }
 
-void drawSkyBox(Object object) {
-	object.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*2, WORLDSIZE, WORLDSIZE));
-	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &object.model[0][0]);
+void drawBackground() {
+	//    if these lines were still there, i get a black screen
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform1i(texHandle, object.texID);
-	glActiveTexture(GL_TEXTURE0 + object.texID);
-	glBindTexture(GL_TEXTURE_2D, object.texID);
+	// background render
 
-	glBindVertexArray(object.vao);
-	glDrawArrays(GL_TRIANGLES, 0, object.size);
-	glBindVertexArray(0);
+	glDisable(GL_DEPTH_TEST); ///!!!!
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0.0f, 1024.0, 512.0, 0.0, 0.0, 1.f);
 
-	glActiveTexture(GL_TEXTURE0 + object.texID);
-	glBindTexture(GL_TEXTURE_2D, GL_TEXTURE0);
-	glFinish();
+	glEnable(GL_TEXTURE_2D); // se ugotovi kam dat
+	glBindTexture(GL_TEXTURE_2D, backgroundTex);
+
+	glBegin(GL_QUADS);
+	glTexCoord2d(0.0, 0.0); glVertex2d(0.0, 0.0);
+	glTexCoord2d(1.0, 0.0); glVertex2d(1024.0, 0.0);
+	glTexCoord2d(1.0, 1.0); glVertex2d(1024.0, 512.0);
+	glTexCoord2d(0.0, 1.0); glVertex2d(0.0, 512.0);
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 void drawObject(Object object) {
@@ -356,6 +366,8 @@ void drawObject(Object object) {
 }
 
 void draw() {
+	//drawBackground();
+
 	glm::mat4 view = glm::lookAt(glm::vec3(zoom, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
@@ -368,8 +380,6 @@ void draw() {
 	sphere1.position = bullet_step(0);
 	sphere2.position = bullet_step(1);
 	cube1.position = bullet_step(2);
-
-	//drawSkyBox(boundaryCube);
 
 	//Draw shapes
 	drawObject(sphere1);
@@ -394,26 +404,27 @@ int main(){
 	glewInit();
 
 	program = LoadShader("shader.vert", "shader.frag");
-
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	backgroundTex = loadTexture("texture/stars.bmp");
 
 	bullet_init();
-
 	handleInit();
 	init();
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_TEXTURE_2D);
-
 	glEnable(GL_CULL_FACE);
 
-	while (!glfwWindowShouldClose(window)) {
-		
-		glUseProgram(program);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	//Black Background
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);	// White Background
 
-		draw();
+	while (!glfwWindowShouldClose(window)) {
+		glUseProgram(program);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		draw(); //DRAW!
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
