@@ -6,7 +6,7 @@ in vec3 color;
 in vec3 normals;
 in vec2 uv;
 
-vec3 ambientColor = vec3(0.2f,0.0f,0.0f);
+vec3 ambientColor = vec3(0.0f,0.0f,0.0f);
 vec3 diffuseColor = vec3(1.0f,1.0f,1.0f);
 uniform vec3 lightDirection;
 uniform sampler2D tex;

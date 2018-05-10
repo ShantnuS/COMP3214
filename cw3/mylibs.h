@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 // OpenGL (GLFW/GLEW)
 #include <GL/glew.h>

@@ -27,7 +27,7 @@ GLuint program;
 
 //Camera 
 glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
-float zoom = WORLDSIZE * 2;
+float zoom = WORLDSIZE;
 float theta = 0.0f;
 
 //Structs 
@@ -124,7 +124,7 @@ std::vector<Normal> generateSphere(float step) {
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
-	//Close
+	//Close window
 	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
@@ -146,7 +146,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if ((key == GLFW_KEY_RIGHT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to right 
 	}
-
 
 	//Other controls
 	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
@@ -311,8 +310,9 @@ void init() {
 
 	//Textures 
 	sphere1.texID = loadTexture("texture/sun.png");
-	sphere2.texID = loadTexture("texture/sun.png");
+	sphere2.texID = loadTexture("texture/moon.bmp");
 	cube1.texID = loadTexture("texture/stones.bmp");
+	boundaryCube.texID = loadTexture("texture/stones.bmp");
 
 	sphere1.position = glm::vec3(0, 0, 0);
 	sphere2.position = glm::vec3(0, 0, 0);
@@ -321,7 +321,25 @@ void init() {
 
 }
 
+void drawSkyBox(Object object) {
+	object.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*2, WORLDSIZE, WORLDSIZE));
+	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &object.model[0][0]);
+
+	glUniform1i(texHandle, object.texID);
+	glActiveTexture(GL_TEXTURE0 + object.texID);
+	glBindTexture(GL_TEXTURE_2D, object.texID);
+
+	glBindVertexArray(object.vao);
+	glDrawArrays(GL_TRIANGLES, 0, object.size);
+	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0 + object.texID);
+	glBindTexture(GL_TEXTURE_2D, GL_TEXTURE0);
+	glFinish();
+}
+
 void drawObject(Object object) {
+	object.model = (glm::translate(glm::mat4(1), object.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0)));
 	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &object.model[0][0]);
 
 	glUniform1i(texHandle, object.texID);
@@ -340,6 +358,7 @@ void drawObject(Object object) {
 void draw() {
 	glm::mat4 view = glm::lookAt(glm::vec3(zoom, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100.0f);
+	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
 
 	glUniformMatrix4fv(viewHandle, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionHandle, 1, GL_FALSE, &projection[0][0]);
@@ -350,25 +369,12 @@ void draw() {
 	sphere2.position = bullet_step(1);
 	cube1.position = bullet_step(2);
 
-	//printf("%f\n",sphere1.position.x);
+	//drawSkyBox(boundaryCube);
 
-	//boundaryCube.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*8/10, WORLDSIZE, WORLDSIZE));;
-	//glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &boundaryCube.model[0][0]);
-	//glBindVertexArray(boundaryCube.vao);
-	//glDrawArrays(GL_LINE_LOOP, 0, boundaryCube.size);
-	//glBindVertexArray(0);
-	//glFinish();
-
-	sphere1.model = glm::translate(glm::mat4(1), sphere1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
+	//Draw shapes
 	drawObject(sphere1);
-
-	sphere2.model = glm::translate(glm::mat4(1), sphere2.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
 	drawObject(sphere2);
-
-	
-	cube1.model = glm::translate(glm::mat4(1), cube1.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0));
 	drawObject(cube1);
-	
 }
 
 int main(){
@@ -376,7 +382,7 @@ int main(){
 	glfwInit();
 
 	GLFWwindow* window;
-	window = glfwCreateWindow(1920 / 2, 1080 / 2, "Hello", NULL, NULL);
+	window = glfwCreateWindow(1920 / 2, 1080 / 2, "Coursework 3 - Shantnu Singh", NULL, NULL);
 	if (!window) {
 		printf("Failed to open window");
 		glfwTerminate();
