@@ -371,6 +371,7 @@ void drawObject(Object object, float scale) {
 	glFinish();
 }
 
+
 void draw() {
 	glm::mat4 view = glm::lookAt(glm::vec3(zoom, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
@@ -397,6 +398,11 @@ void draw() {
 	drawObject(sphere4, 2); //Earth
 	drawObject(sphere5, 0.25f); //Moon
 
+}
+
+void resetAnimations() {
+	MovingBits.clear();
+	bullet_init();
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -428,25 +434,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
 		//Camera to picture location
 	}
-	if ((key == GLFW_KEY_L) && action == GLFW_PRESS) {
-		//Camera to other location 1
-	}
-	if ((key == GLFW_KEY_O) && action == GLFW_PRESS) {
-		//Camera to other location 2
-	}
 	if ((key == GLFW_KEY_T) && action == GLFW_PRESS) {
-		//Start tour
-	}
-	if ((key == GLFW_KEY_G) && action == GLFW_PRESS) {
-		//Exit tour
+		//Start or Pause tour
 	}
 	if ((key == GLFW_KEY_H) && action == GLFW_PRESS) {
 		//Display help on screen out printed on console
+		printHelp();
 	}
 	if ((key == GLFW_KEY_R) && action == GLFW_PRESS) {
 		//Reset Animations
-		MovingBits.clear();
-		bullet_init();
+		resetAnimations();
 	}
 }
 
@@ -467,7 +464,7 @@ int main(){
 	glewInit();
 
 	programDefault = LoadShader("shader.vert", "shader.frag");
-	programSkybox = LoadShader("skybox.vert", "skybox.frag");
+	//programSkybox = LoadShader("skybox.vert", "skybox.frag");
 	program = programDefault;
 	backgroundTex = loadTexture("texture/stars.jpg");
 

@@ -177,3 +177,15 @@ GLuint LoadShader(const char * vertex_file_path, const char * fragment_file_path
 
 	return ProgramID;
 }
+
+void printHelp() {
+	printf("****---HELP---****\n");
+	printf("*Press ESC/Q to quit \n");
+	printf("*Press LEFT to look left \n");
+	printf("*Press RIGHT to look right \n");
+	printf("*Press UP to increase speed \n");
+	printf("*Press DOWN to decrease speed \n");
+	printf("*Press T to pause/start the tour \n");
+	printf("*Press P for screenshot location \n");
+	printf("*Press H to bring up help again! \n");
+}
