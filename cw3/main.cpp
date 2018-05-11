@@ -148,52 +148,6 @@ std::vector<Normal> generateSkybox(float step) {
 	return getNormal(sphereVectors);
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-
-	//Close window
-	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-
-	//Camera controls
-	if ((key == GLFW_KEY_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		if (zoom > 0) {
-			zoom -= 0.8f;
-			printf("%f\n", zoom);
-		}
-	}
-	if ((key == GLFW_KEY_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		zoom += 0.8f;
-		printf("%f\n", zoom);
-	}
-	if ((key == GLFW_KEY_LEFT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		//Turn camera to left 
-	}
-	if ((key == GLFW_KEY_RIGHT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		//Turn camera to right 
-	}
-
-	//Other controls
-	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
-		//Camera to picture location
-	} 
-	if ((key == GLFW_KEY_L) && action == GLFW_PRESS) {
-		//Camera to other location 1
-	}
-	if ((key == GLFW_KEY_O) && action == GLFW_PRESS) {
-		//Camera to other location 2
-	}
-	if ((key == GLFW_KEY_T) && action == GLFW_PRESS) {
-		//Start tour
-	}
-	if ((key == GLFW_KEY_G) && action == GLFW_PRESS) {
-		//Exit tour
-	}
-	if ((key == GLFW_KEY_H) && action == GLFW_PRESS) {
-		//Display help on screen out printed on console
-	}
-}
-
 btRigidBody* SetSphere(float size, btTransform T, btVector3 velocity) {
 	btCollisionShape* fallshape = new btSphereShape(size);
 	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
@@ -251,7 +205,7 @@ void bullet_init() {
 	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 0, 1, 1), btVector3(-1000,0, 0)), btVector3(0, 0, 0)));
 
 	//MARS
-	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(200, -220, 0)), btVector3(0, 0, 0)));
+	MovingBits.push_back(SetSphere(200., btTransform(btQuaternion(0, 1, 0, 1), btVector3(200, -220, 0)), btVector3(0, 0, 0)));
 	
 	//METEOR 
 	MovingBits.push_back(SetSphere(0.01f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(-10, 5, 20)), btVector3(0, -0.5, -1)));
@@ -443,6 +397,57 @@ void draw() {
 	drawObject(sphere4, 2); //Earth
 	drawObject(sphere5, 0.25f); //Moon
 
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+	//Close window
+	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	//Camera controls
+	if ((key == GLFW_KEY_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		if (zoom > 0) {
+			zoom -= 0.8f;
+			printf("%f\n", zoom);
+		}
+	}
+	if ((key == GLFW_KEY_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		zoom += 0.8f;
+		printf("%f\n", zoom);
+	}
+	if ((key == GLFW_KEY_LEFT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Turn camera to left 
+	}
+	if ((key == GLFW_KEY_RIGHT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Turn camera to right 
+	}
+
+	//Other controls
+	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
+		//Camera to picture location
+	}
+	if ((key == GLFW_KEY_L) && action == GLFW_PRESS) {
+		//Camera to other location 1
+	}
+	if ((key == GLFW_KEY_O) && action == GLFW_PRESS) {
+		//Camera to other location 2
+	}
+	if ((key == GLFW_KEY_T) && action == GLFW_PRESS) {
+		//Start tour
+	}
+	if ((key == GLFW_KEY_G) && action == GLFW_PRESS) {
+		//Exit tour
+	}
+	if ((key == GLFW_KEY_H) && action == GLFW_PRESS) {
+		//Display help on screen out printed on console
+	}
+	if ((key == GLFW_KEY_R) && action == GLFW_PRESS) {
+		//Reset Animations
+		MovingBits.clear();
+		bullet_init();
+	}
 }
 
 int main(){
