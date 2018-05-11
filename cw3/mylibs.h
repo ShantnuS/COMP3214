@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <math.h>
 
 // OpenGL (GLFW/GLEW)
 #include <GL/glew.h>

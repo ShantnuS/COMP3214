@@ -18,8 +18,8 @@ out vec2 uv;
 
 void main(){
 
-	//vec4 tempVec = model * vec4(modelNormals,1);
-	normals = modelNormals;  //tempVec.xyz;
+	vec4 tempVec = model * vec4(modelNormals,1);
+	normals = tempVec.xyz;
 
 	uv = modelUVs;
 

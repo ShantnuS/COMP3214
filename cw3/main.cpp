@@ -24,6 +24,8 @@ GLuint texHandle;
 
 //Programs 
 GLuint program;
+GLuint programDefault;
+GLuint programSkybox;
 
 //Camera 
 glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -46,10 +48,10 @@ struct Normal {
 };
 
 //Objects 
-Object sphere1;
-Object sphere2;
-Object cube1;
-Object boundaryCube;
+Object sphere1; //SUN
+Object sphere2; //EARTH
+Object sphere3; //MOON
+Object boundarySphere; //BACKGROUND
 
 GLuint backgroundTex;
 
@@ -60,13 +62,13 @@ static void error_callback(int error, const char* description) {
 
 glm::vec2 getPolar(glm::vec3 v){
 	float r = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-	return glm::vec2(atan(v.y / v.x), acos(v.z / r));
+	return glm::vec2(atan2(v.x , v.y)/glm::pi<float>()*0.5, asin(v.z / r)/glm::pi<float>()-0.5);
 }
 
 glm::vec3 getPolarCoordinate(float i, float j) {
-	float x = cos(i)*sin(j);
-	float y = sin(i)*sin(j);
-	float z = cos(j);
+	float x = cos(i)*cos(j);
+	float y = sin(i)*cos(j);
+	float z = sin(j);
 
 	return glm::vec3(x, y, z);
 }
@@ -112,10 +114,29 @@ std::vector<Normal> generateSphere(float step) {
 	for (float i = 0; i < glm::radians(360.0f); i += step) {
 		for (float j = 0; j < glm::radians(360.0f); j += step) {
 			//Triangle 1
-			sphereVectors.push_back(getPolarCoordinate(i, j));
-			sphereVectors.push_back(getPolarCoordinate(i + step, j));
-			sphereVectors.push_back(getPolarCoordinate(i + step, j + step));
+			sphereVectors.push_back(getPolarCoordinate(i, j)); //A
+			sphereVectors.push_back(getPolarCoordinate(i + step, j)); //B
+			sphereVectors.push_back(getPolarCoordinate(i + step, j + step)); //C
 			//Triangle 2
+			sphereVectors.push_back(getPolarCoordinate(i + step, j + step)); //C
+			sphereVectors.push_back(getPolarCoordinate(i, j + step)); //D
+			sphereVectors.push_back(getPolarCoordinate(i, j)); //A
+		}
+	}
+	return getNormal(sphereVectors);
+}
+
+std::vector<Normal> generateSkybox(float step) {
+
+	std::vector<glm::vec3> sphereVectors;
+
+	for (float i = 0; i < glm::radians(360.0f); i += step) {
+		for (float j = 0; j < glm::radians(360.0f); j += step) {
+			//Triangle 1
+			sphereVectors.push_back(getPolarCoordinate(i + step, j + step));
+			sphereVectors.push_back(getPolarCoordinate(i + step, j));
+			sphereVectors.push_back(getPolarCoordinate(i, j));
+			//Triangle 2	
 			sphereVectors.push_back(getPolarCoordinate(i + step, j + step));
 			sphereVectors.push_back(getPolarCoordinate(i, j + step));
 			sphereVectors.push_back(getPolarCoordinate(i, j));
@@ -208,31 +229,31 @@ void bullet_init() {
 	dynamicsWorld->setGravity(btVector3(0., GRAVITY, 0));
 	
 	//GROUND (BOTTOM)
-	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
-	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -WORLDSIZE, 0)));
-	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-	groundRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(groundRigidBody);
+	//btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
+	//btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -WORLDSIZE, 0)));
+	//btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+	//btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+	//groundRigidBody->setRestitution(COE);
+	//dynamicsWorld->addRigidBody(groundRigidBody);
 
-	//TOP (CEILING)
-	btCollisionShape* topShape = new btStaticPlaneShape(btVector3(0, -1, 0), 1);
-	btDefaultMotionState* topMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, WORLDSIZE, 0)));
-	btRigidBody::btRigidBodyConstructionInfo topRigidBodyCI(0, topMotionState, topShape, btVector3(0, 0, 0));
-	btRigidBody* topRigidBody = new btRigidBody(topRigidBodyCI);
-	topRigidBody->setRestitution(COE);
-	dynamicsWorld->addRigidBody(topRigidBody);
+	////TOP (CEILING)
+	//btCollisionShape* topShape = new btStaticPlaneShape(btVector3(0, -1, 0), 1);
+	//btDefaultMotionState* topMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, WORLDSIZE, 0)));
+	//btRigidBody::btRigidBodyConstructionInfo topRigidBodyCI(0, topMotionState, topShape, btVector3(0, 0, 0));
+	//btRigidBody* topRigidBody = new btRigidBody(topRigidBodyCI);
+	//topRigidBody->setRestitution(COE);
+	//dynamicsWorld->addRigidBody(topRigidBody);
 
-	//Sphere1
-	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 0, 1, 1), btVector3(0, 0, 0)), btVector3(0, -1, 0)));
+	//SUN
+	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 0, 1, 1), btVector3(-100,0, 0)), btVector3(0, 0, 0)));
 
 	
-	//Sphere2
-	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0)), btVector3(0, -1, 0)));
+	//EARTH
+	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0)), btVector3(0, 0, 0)));
 	
 	
-	//Cube1
-	MovingBits.push_back(SetCube(btVector3(1, 1, 1), btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 0)), btVector3(0, -1, 0)));
+	//MOON
+	MovingBits.push_back(SetSphere(0.5f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 20)), btVector3(0, -0.5, -1)));
 	
 }
 
@@ -303,25 +324,46 @@ void init() {
 	//Sphere object
 	std::vector<Normal> objectSphere = generateSphere(glm::radians(4.0f));
 	std::vector<Normal> objectCube = generateCube();
+	std::vector<Normal> objectSkybox = generateSphere(glm::radians(5.0f));
 
 	//Spheres and cubes init
 	sphere1 = bufferInit(objectSphere);
 	sphere2 = bufferInit(objectSphere);
-	cube1 = bufferInit(objectCube);
-	boundaryCube = bufferInit(objectCube);
+	sphere3 = bufferInit(objectSphere);
+	boundarySphere = bufferInit(objectSkybox);
 
 	//Textures 
-	sphere1.texID = loadTexture("texture/sun.png");
-	sphere2.texID = loadTexture("texture/moon.bmp");
-	cube1.texID = loadTexture("texture/stones.bmp");
-	boundaryCube.texID = loadTexture("texture/stones.bmp");
+	sphere1.texID = loadTexture("texture/sun.jpg");
+	sphere2.texID = loadTexture("texture/earth.jpg");
+	sphere3.texID = loadTexture("texture/moon.bmp");
+	boundarySphere.texID = backgroundTex;
 
 	sphere1.position = glm::vec3(0, 0, 0);
 	sphere2.position = glm::vec3(0, 0, 0);
-	cube1.position = glm::vec3(0, 0, 0);
-	boundaryCube.position= glm::vec3(0, 0, 0);
+	sphere3.position = glm::vec3(0, 0, 0);
+	boundarySphere.position= glm::vec3(0, 0, 0);
 
 }
+
+void drawSkyBox(Object object) {
+	//glDisable(GL_CULL_FACE);
+	object.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*100, WORLDSIZE*100, WORLDSIZE*100));
+	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &object.model[0][0]);
+
+	glUniform1i(texHandle, object.texID);
+	glActiveTexture(GL_TEXTURE0 + object.texID);
+	glBindTexture(GL_TEXTURE_2D, object.texID);
+
+	glBindVertexArray(object.vao);
+	glDrawArrays(GL_TRIANGLES, 0, object.size);
+	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0 + object.texID);
+	glBindTexture(GL_TEXTURE_2D, GL_TEXTURE0);
+	glFinish();
+	//glEnable(GL_CULL_FACE);
+}
+
 
 void drawBackground() {
 	//    if these lines were still there, i get a black screen
@@ -348,8 +390,8 @@ void drawBackground() {
 	glDisable(GL_TEXTURE_2D);
 }
 
-void drawObject(Object object) {
-	object.model = (glm::translate(glm::mat4(1), object.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0)));
+void drawObject(Object object, float scale) {
+	object.model = (glm::translate(glm::mat4(1), object.position) * glm::rotate(glm::mat4(1), theta, glm::vec3(0, 1, 0)) * glm::scale(glm::mat4(1), glm::vec3(scale, scale, scale)));
 	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &object.model[0][0]);
 
 	glUniform1i(texHandle, object.texID);
@@ -366,10 +408,8 @@ void drawObject(Object object) {
 }
 
 void draw() {
-	//drawBackground();
-
 	glm::mat4 view = glm::lookAt(glm::vec3(zoom, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
 
 	glUniformMatrix4fv(viewHandle, 1, GL_FALSE, &view[0][0]);
@@ -379,12 +419,14 @@ void draw() {
 	//use bullet to move shapes
 	sphere1.position = bullet_step(0);
 	sphere2.position = bullet_step(1);
-	cube1.position = bullet_step(2);
+	sphere3.position = bullet_step(2);
+
+	drawSkyBox(boundarySphere);
 
 	//Draw shapes
-	drawObject(sphere1);
-	drawObject(sphere2);
-	drawObject(cube1);
+	drawObject(sphere1, 2);
+	drawObject(sphere2, 1);
+	drawObject(sphere3, 0.5f);
 }
 
 int main(){
@@ -392,7 +434,7 @@ int main(){
 	glfwInit();
 
 	GLFWwindow* window;
-	window = glfwCreateWindow(1920 / 2, 1080 / 2, "Coursework 3 - Shantnu Singh", NULL, NULL);
+	window = glfwCreateWindow(1920, 1080, "Coursework 3 - Shantnu Singh", NULL, NULL);
 	if (!window) {
 		printf("Failed to open window");
 		glfwTerminate();
@@ -403,8 +445,11 @@ int main(){
 	glfwSetKeyCallback(window, key_callback);
 	glewInit();
 
-	program = LoadShader("shader.vert", "shader.frag");
-	backgroundTex = loadTexture("texture/stars.bmp");
+	programDefault = LoadShader("shader.vert", "shader.frag");
+	programSkybox = LoadShader("skybox.vert", "skybox.frag");
+	program = programDefault;
+	backgroundTex = loadTexture("texture/stars.jpg");
+
 
 	bullet_init();
 	handleInit();
@@ -415,13 +460,12 @@ int main(){
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
 
-	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	//Black Background
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);	// White Background
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	//Black Background
+	//glClearColor(1.0f, 1.0f, 1.0f, 0.0f);	// White Background
 
 	while (!glfwWindowShouldClose(window)) {
 		glUseProgram(program);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		draw(); //DRAW!
 
