@@ -30,7 +30,7 @@ GLuint programSkybox;
 //Camera 
 glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 float zoom = WORLDSIZE;
-float theta = 0.0f;
+float theta = 0.1f;
 
 //Structs 
 struct Object {
@@ -49,8 +49,11 @@ struct Normal {
 
 //Objects 
 Object sphere1; //SUN
-Object sphere2; //EARTH
-Object sphere3; //MOON
+Object sphere2; //MARS
+Object sphere3; //METEOR
+Object sphere4; //EARTH
+Object sphere5; //MOON
+
 Object boundarySphere; //BACKGROUND
 
 GLuint backgroundTex;
@@ -155,12 +158,12 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	//Camera controls
 	if ((key == GLFW_KEY_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		if (zoom > 0) {
-			zoom -= 0.1f;
+			zoom -= 0.8f;
 			printf("%f\n", zoom);
 		}
 	}
 	if ((key == GLFW_KEY_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		zoom += 0.1f;
+		zoom += 0.8f;
 		printf("%f\n", zoom);
 	}
 	if ((key == GLFW_KEY_LEFT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
@@ -245,16 +248,19 @@ void bullet_init() {
 	//dynamicsWorld->addRigidBody(topRigidBody);
 
 	//SUN
-	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 0, 1, 1), btVector3(-100,0, 0)), btVector3(0, 0, 0)));
+	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 0, 1, 1), btVector3(-1000,0, 0)), btVector3(0, 0, 0)));
 
+	//MARS
+	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(200, -220, 0)), btVector3(0, 0, 0)));
 	
-	//EARTH
+	//METEOR 
+	MovingBits.push_back(SetSphere(0.01f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(-10, 5, 20)), btVector3(0, -0.5, -1)));
+
+	//EARTH 
 	MovingBits.push_back(SetSphere(1., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0)), btVector3(0, 0, 0)));
-	
-	
+
 	//MOON
-	MovingBits.push_back(SetSphere(0.5f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 20)), btVector3(0, -0.5, -1)));
-	
+	MovingBits.push_back(SetSphere(0.25f, btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 5)), btVector3(0, 0, 0)));
 }
 
 glm::vec3 bullet_step(int i) {
@@ -322,7 +328,7 @@ void handleInit() {
 void init() {
 	//Initialise objects
 	//Sphere object
-	std::vector<Normal> objectSphere = generateSphere(glm::radians(4.0f));
+	std::vector<Normal> objectSphere = generateSphere(glm::radians(1.0f));
 	std::vector<Normal> objectCube = generateCube();
 	std::vector<Normal> objectSkybox = generateSphere(glm::radians(5.0f));
 
@@ -330,12 +336,16 @@ void init() {
 	sphere1 = bufferInit(objectSphere);
 	sphere2 = bufferInit(objectSphere);
 	sphere3 = bufferInit(objectSphere);
+	sphere4 = bufferInit(objectSphere);
+	sphere5 = bufferInit(objectSphere);
 	boundarySphere = bufferInit(objectSkybox);
 
 	//Textures 
 	sphere1.texID = loadTexture("texture/sun.jpg");
-	sphere2.texID = loadTexture("texture/earth.jpg");
+	sphere2.texID = loadTexture("texture/mars.jpg");
 	sphere3.texID = loadTexture("texture/moon.bmp");
+	sphere4.texID = loadTexture("texture/earth.jpg");
+	sphere5.texID = loadTexture("texture/moon.jpg");
 	boundarySphere.texID = backgroundTex;
 
 	sphere1.position = glm::vec3(0, 0, 0);
@@ -347,7 +357,7 @@ void init() {
 
 void drawSkyBox(Object object) {
 	//glDisable(GL_CULL_FACE);
-	object.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), theta, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*100, WORLDSIZE*100, WORLDSIZE*100));
+	object.model = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0)) * glm::rotate(glm::mat4(1), 0.1f, glm::vec3(1, 0, 0)) * glm::scale(glm::mat4(1), glm::vec3(WORLDSIZE*100, WORLDSIZE*100, WORLDSIZE*100));
 	glUniformMatrix4fv(modelHandle, 1, GL_FALSE, &object.model[0][0]);
 
 	glUniform1i(texHandle, object.texID);
@@ -411,6 +421,7 @@ void draw() {
 	glm::mat4 view = glm::lookAt(glm::vec3(zoom, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
+	//theta += 0.001f;
 
 	glUniformMatrix4fv(viewHandle, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionHandle, 1, GL_FALSE, &projection[0][0]);
@@ -420,13 +431,18 @@ void draw() {
 	sphere1.position = bullet_step(0);
 	sphere2.position = bullet_step(1);
 	sphere3.position = bullet_step(2);
+	sphere4.position = bullet_step(3);
+	sphere5.position = bullet_step(4);
 
 	drawSkyBox(boundarySphere);
 
 	//Draw shapes
-	drawObject(sphere1, 2);
-	drawObject(sphere2, 1);
-	drawObject(sphere3, 0.5f);
+	drawObject(sphere1, 100); //Sun
+	drawObject(sphere2, 200); //Mars
+	drawObject(sphere3, 0.1f); //Meteor
+	drawObject(sphere4, 2); //Earth
+	drawObject(sphere5, 0.25f); //Moon
+
 }
 
 int main(){
