@@ -33,6 +33,7 @@ float zoom = WORLDSIZE;
 float theta = 0.1f;
 float leftright = 0.0f;
 float pan = 0.0f;
+float tilt = 1.0f;
 
 //Structs 
 struct Object {
@@ -299,7 +300,7 @@ void init() {
 	//Textures 
 	sphere1.texID = loadTexture("texture/jupiter.jpg");
 	sphere2.texID = loadTexture("texture/mars.jpg");
-	sphere3.texID = loadTexture("texture/moon.bmp");
+	sphere3.texID = loadTexture("texture/meteor.bmp");
 	sphere4.texID = loadTexture("texture/earth.jpg");
 	sphere5.texID = loadTexture("texture/moon.jpg");
 	boundarySphere.texID = backgroundTex;
@@ -375,7 +376,7 @@ void drawObject(Object object, float scale) {
 
 
 void draw() {
-	glm::mat4 view = glm::lookAt(glm::vec3(zoom, pan, leftright), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 view = glm::lookAt(glm::vec3(zoom, pan, leftright ), glm::vec3(zoom-WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
 	//theta += 0.001f;
@@ -407,6 +408,21 @@ void resetAnimations() {
 	bullet_init();
 }
 
+void resetCameraAttributes() {
+	lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
+	zoom = WORLDSIZE;
+	theta = 0.1f;
+	leftright = 0.0f;
+	pan = 0.0f;
+	tilt = 1.0f;
+}
+
+void setCamera(float tZoom, float tPan, float tLeftRight) {
+	zoom = tZoom;
+	pan = tPan;
+	leftright = tLeftRight;
+}
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
 	//Close window
@@ -418,12 +434,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if ((key == GLFW_KEY_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		if (zoom > 0) {
 			zoom -= 0.8f;
-			printf("%f\n", zoom);
 		}
 	}
 	if ((key == GLFW_KEY_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		zoom += 0.8f;
-		printf("%f\n", zoom);
 	}
 	if ((key == GLFW_KEY_LEFT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to left 
@@ -446,6 +460,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	//Other controls
 	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
 		//Camera to picture location
+		resetCameraAttributes();
 	}
 	if ((key == GLFW_KEY_T) && action == GLFW_PRESS) {
 		//Start or Pause tour
@@ -457,6 +472,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if ((key == GLFW_KEY_R) && action == GLFW_PRESS) {
 		//Reset Animations
 		resetAnimations();
+	}
+	if ((key == GLFW_KEY_S) && action == GLFW_PRESS) {
+		//Print coordinate
+		printf("Zoom: %f, Pan: %f, LeftRight: %f\n, Tilt: %f", zoom, pan, leftright, tilt);
 	}
 }
 
