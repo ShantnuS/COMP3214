@@ -56,6 +56,7 @@ Object sphere2; //MARS
 Object sphere3; //METEOR
 Object sphere4; //EARTH
 Object sphere5; //MOON
+Object model1; //UFO
 
 Object boundarySphere; //BACKGROUND STARS
 
@@ -130,6 +131,28 @@ std::vector<Normal> generateSphere(float step) {
 		}
 	}
 	return getNormal(sphereVectors);
+}
+
+std::vector<Normal> generateModel(const char *filename, glm::vec3 move, glm::vec3 rotate) {
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
+	std::vector< glm::vec3 > vertices;
+
+	printf("Loading object located at : %s \n", filename);
+	std::string obj_err = tinyobj::LoadObj(shapes, materials, filename, NULL);
+	printf("Object has been loaded \n");
+
+	for (int i = 0; i < shapes.size(); i++)
+		for (int j = 0; j < shapes[i].mesh.indices.size(); j++)
+			vertices.push_back(glm::quat(rotate) * glm::vec3(
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3] + move.x,
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1] + move.y,
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2] + move.z
+			));
+	printf("Readied the object vertex \n", filename);
+
+	printf("Object ready file loaded: \n");
+	return getNormal(vertices);
 }
 
 std::vector<Normal> generateSkybox(float step) {
@@ -218,6 +241,9 @@ void bullet_init() {
 
 	//MOON
 	MovingBits.push_back(SetSphere(0.25f, btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 5)), btVector3(0, 0, 0)));
+
+	//UFO
+	MovingBits.push_back(SetSphere(0.01f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 20)), btVector3(0, -0.1, -0.1)));
 }
 
 glm::vec3 bullet_step(int i) {
@@ -288,6 +314,7 @@ void init() {
 	std::vector<Normal> objectSphere = generateSphere(glm::radians(1.0f));
 	std::vector<Normal> objectCube = generateCube();
 	std::vector<Normal> objectSkybox = generateSphere(glm::radians(5.0f));
+	//std::vector<Normal> objectUFO = generateModel("alien.obj", glm::vec3(1, 0, 0), glm::vec3(1, 0, 0));
 
 	//Spheres and cubes init
 	sphere1 = bufferInit(objectSphere);
@@ -295,6 +322,7 @@ void init() {
 	sphere3 = bufferInit(objectSphere);
 	sphere4 = bufferInit(objectSphere);
 	sphere5 = bufferInit(objectSphere);
+	//model1 = bufferInit(objectUFO);
 	boundarySphere = bufferInit(objectSkybox);
 
 	//Textures 
@@ -303,6 +331,7 @@ void init() {
 	sphere3.texID = loadTexture("texture/meteor.bmp");
 	sphere4.texID = loadTexture("texture/earth.jpg");
 	sphere5.texID = loadTexture("texture/moon.jpg");
+	//model1.texID = loadTexture("texture/meteor.bmp");
 	boundarySphere.texID = backgroundTex;
 
 	sphere1.position = glm::vec3(0, 0, 0);
@@ -391,6 +420,7 @@ void draw() {
 	sphere3.position = bullet_step(2);
 	sphere4.position = bullet_step(3);
 	sphere5.position = bullet_step(4);
+	//model1.position = bullet_step(4);
 
 	drawSkyBox(boundarySphere);
 
@@ -400,6 +430,7 @@ void draw() {
 	drawObject(sphere3, 0.1f); //Meteor
 	drawObject(sphere4, 2); //Earth
 	drawObject(sphere5, 0.25f); //Moon
+	//drawObject(model1, 1.25f); //Moon
 
 }
 
