@@ -31,6 +31,8 @@ GLuint programSkybox;
 glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 float zoom = WORLDSIZE;
 float theta = 0.1f;
+float leftright = 0.0f;
+float pan = 0.0f;
 
 //Structs 
 struct Object {
@@ -48,13 +50,13 @@ struct Normal {
 };
 
 //Objects 
-Object sphere1; //SUN
+Object sphere1; //JUPITER
 Object sphere2; //MARS
 Object sphere3; //METEOR
 Object sphere4; //EARTH
 Object sphere5; //MOON
 
-Object boundarySphere; //BACKGROUND
+Object boundarySphere; //BACKGROUND STARS
 
 GLuint backgroundTex;
 
@@ -201,7 +203,7 @@ void bullet_init() {
 	//topRigidBody->setRestitution(COE);
 	//dynamicsWorld->addRigidBody(topRigidBody);
 
-	//SUN
+	//JUPITER
 	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 0, 1, 1), btVector3(-1000,0, 0)), btVector3(0, 0, 0)));
 
 	//MARS
@@ -295,7 +297,7 @@ void init() {
 	boundarySphere = bufferInit(objectSkybox);
 
 	//Textures 
-	sphere1.texID = loadTexture("texture/sun.jpg");
+	sphere1.texID = loadTexture("texture/jupiter.jpg");
 	sphere2.texID = loadTexture("texture/mars.jpg");
 	sphere3.texID = loadTexture("texture/moon.bmp");
 	sphere4.texID = loadTexture("texture/earth.jpg");
@@ -373,7 +375,7 @@ void drawObject(Object object, float scale) {
 
 
 void draw() {
-	glm::mat4 view = glm::lookAt(glm::vec3(zoom, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 view = glm::lookAt(glm::vec3(zoom, pan, leftright), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
 	//theta += 0.001f;
@@ -392,7 +394,7 @@ void draw() {
 	drawSkyBox(boundarySphere);
 
 	//Draw shapes
-	drawObject(sphere1, 100); //Sun
+	drawObject(sphere1, 100); //Jupiter
 	drawObject(sphere2, 200); //Mars
 	drawObject(sphere3, 0.1f); //Meteor
 	drawObject(sphere4, 2); //Earth
@@ -425,10 +427,21 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 	if ((key == GLFW_KEY_LEFT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to left 
+			leftright -= 0.8f;
 	}
 	if ((key == GLFW_KEY_RIGHT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to right 
+		leftright += 0.8f;
 	}
+	if ((key == GLFW_KEY_PAGE_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Turn camera to right 
+		pan += 0.8f;
+	}
+	if ((key == GLFW_KEY_PAGE_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Turn camera to right 
+		pan -= 0.8f;
+	}
+
 
 	//Other controls
 	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
