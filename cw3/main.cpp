@@ -329,7 +329,7 @@ void init() {
 	sphere1.texID = loadTexture("texture/jupiter.jpg");
 	sphere2.texID = loadTexture("texture/mars.jpg");
 	sphere3.texID = loadTexture("texture/meteor.bmp");
-	sphere4.texID = loadTexture("texture/earth.jpg");
+	sphere4.texID = loadTexture("texture/earth.png");
 	sphere5.texID = loadTexture("texture/moon.jpg");
 	//model1.texID = loadTexture("texture/meteor.bmp");
 	boundarySphere.texID = backgroundTex;

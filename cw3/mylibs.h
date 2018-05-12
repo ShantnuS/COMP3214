@@ -19,7 +19,7 @@
 
 // tiny_obj_loader
 #define TINYOBJLOADER_IMPLEMENTATION // only define in one file
-#include <tiny_obj_loader.h>
+#include "tiny_obj_loader.h"
 
 // stb_image
 #define STB_IMAGE_IMPLEMENTATION // only define in one file
