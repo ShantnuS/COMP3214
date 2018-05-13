@@ -187,10 +187,10 @@ void printHelp() {
 	printf("*Press PAGE_UP to look up \n");
 	printf("*Press PAGE_DOWN to look down \n");
 	printf("*Press WASD to look around also \n");
-	printf("*Press DOWN to decrease speed \n");
 	printf("*Press UP to increase speed \n");
 	printf("*Press DOWN to decrease speed \n");
 	printf("*Press T to pause/start the tour \n");
+	printf("*Press Y to restart the tour \n");
 	printf("*Press P for screenshot location \n");
 	printf("*Press H to bring up help again! \n");
 }

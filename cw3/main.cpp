@@ -40,6 +40,7 @@ float pan = 0.0f;
 float tilt = 1.0f;
 float speed = 0.0005f;
 bool tour = true;
+bool tempScene = false;
 glm::mat4 view;
 glm::vec3 coordinate;
 LerperSequencer camera;
@@ -487,7 +488,6 @@ void resetCameraAttributes() {
 }
 
 void goToLocation(float x, float y, float z) {
-	tour = false;
 	coordinate = glm::vec3(x, y, z);
 	view = glm::lookAt(coordinate, glm::vec3(zoom - WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
 }
@@ -540,6 +540,17 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	//Other controls
 	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
 		//Camera to picture location
+		if (!tempScene) {
+			tempScene = true;
+			tour = false;
+			goToLocation(WORLDSIZE, 0, 0);
+		}
+		else {
+			tempScene = false;
+			tour = true;
+		}
+	}
+	if ((key == GLFW_KEY_Y) && action == GLFW_PRESS) {
 		resetLerper();
 	}
 	if ((key == GLFW_KEY_T) && action == GLFW_PRESS) {
