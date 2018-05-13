@@ -4,6 +4,10 @@
 #include "mylibs.h"
 #include "World.h"
 
+// tiny_obj_loader
+#define TINYOBJLOADER_IMPLEMENTATION // only define in one file
+#include "tiny_obj_loader.h"
+
 //Bullet Physics 
 btBroadphaseInterface* broadphase;
 btDefaultCollisionConfiguration* collisionConfiguration;
@@ -34,6 +38,10 @@ float theta = 0.1f;
 float leftright = 0.0f;
 float pan = 0.0f;
 float tilt = 1.0f;
+float speed = 0.0005f;
+bool tour = true;
+glm::mat4 view;
+LerperSequencer camera;
 
 //Structs 
 struct Object {
@@ -139,7 +147,8 @@ std::vector<Normal> generateModel(const char *filename, glm::vec3 move, glm::vec
 	std::vector< glm::vec3 > vertices;
 
 	printf("Loading object located at : %s \n", filename);
-	std::string obj_err = tinyobj::LoadObj(shapes, materials, filename, NULL);
+	std::string obj_err = 
+		tinyobj::LoadObj(shapes, materials, filename, NULL);
 	printf("Object has been loaded \n");
 
 	for (int i = 0; i < shapes.size(); i++)
@@ -300,6 +309,24 @@ Object bufferInit(std::vector<Normal> vp) {
 	return myObj;
 }
 
+void initLerper() {
+	camera.sequence.clear();
+	Lerper part1 = Lerper(glm::vec3(WORLDSIZE,0,0), glm::vec3(5, 0, 0), speed, 0.5f);
+	Lerper part2 = Lerper(glm::vec3(5, 0, 0), glm::vec3(400, 0, 0), speed, 0.5f);
+	Lerper part3 = Lerper(glm::vec3(400, 0, 0), glm::vec3(400, -70, 0), speed, 0.5f);
+	camera.addLerper(part1);
+	camera.addLerper(part2);
+	camera.addLerper(part3);
+}
+
+void resetLerper() {
+	camera.reset();
+}
+
+glm::vec3 stepCamera(float step) {
+	return camera.lerpStepSmooth(step);
+}
+
 void handleInit() {
 	modelHandle = glGetUniformLocation(program, "model");
 	viewHandle = glGetUniformLocation(program, "view");
@@ -405,7 +432,14 @@ void drawObject(Object object, float scale) {
 
 
 void draw() {
-	glm::mat4 view = glm::lookAt(glm::vec3(zoom, pan, leftright ), glm::vec3(zoom-WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+	//glm::mat4 view = glm::lookAt(glm::vec3(zoom, pan, leftright ), glm::vec3(zoom-WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+	//glm::vec3 newPos = stepCamera();
+	//zoom = newPos.x;
+	//pan = newPos.y;
+	//leftright = newPos.z;
+	if (tour) {
+		view = glm::lookAt(stepCamera(speed), glm::vec3(zoom - WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+	}
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
 	//theta += 0.001f;
@@ -413,6 +447,7 @@ void draw() {
 	glUniformMatrix4fv(viewHandle, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionHandle, 1, GL_FALSE, &projection[0][0]);
 	glUniform3f(lightHandle, lightDirection.x, lightDirection.y, lightDirection.z);
+
 
 	//use bullet to move shapes
 	sphere1.position = bullet_step(0);
@@ -448,6 +483,11 @@ void resetCameraAttributes() {
 	tilt = 1.0f;
 }
 
+void goToLocation(float x, float y, float z) {
+	tour = false;
+	view = glm::lookAt(glm::vec3(x, y, z), glm::vec3(zoom - WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+}
+
 void setCamera(float tZoom, float tPan, float tLeftRight) {
 	zoom = tZoom;
 	pan = tPan;
@@ -463,27 +503,29 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 	//Camera controls
 	if ((key == GLFW_KEY_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		if (zoom > 0) {
-			zoom -= 0.8f;
+		if (speed < 1.0f) {
+			speed += 0.0001f;
 		}
 	}
 	if ((key == GLFW_KEY_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		zoom += 0.8f;
+		if (speed >= 0) {
+			speed -= 0.0001f;
+		}
 	}
-	if ((key == GLFW_KEY_LEFT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+	if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to left 
-			leftright -= 0.8f;
-	}
-	if ((key == GLFW_KEY_RIGHT) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		//Turn camera to right 
 		leftright += 0.8f;
 	}
-	if ((key == GLFW_KEY_PAGE_UP) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+	if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_D) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to right 
+		leftright -= 0.8f;
+	}
+	if ((key == GLFW_KEY_PAGE_UP || key == GLFW_KEY_W) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Pan Up
 		pan += 0.8f;
 	}
-	if ((key == GLFW_KEY_PAGE_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
-		//Turn camera to right 
+	if ((key == GLFW_KEY_PAGE_DOWN || key == GLFW_KEY_S) && action == GLFW_REPEAT || action == GLFW_PRESS) {
+		//Pan Down
 		pan -= 0.8f;
 	}
 
@@ -491,10 +533,11 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	//Other controls
 	if ((key == GLFW_KEY_P) && action == GLFW_PRESS) {
 		//Camera to picture location
-		resetCameraAttributes();
+		resetLerper();
 	}
 	if ((key == GLFW_KEY_T) && action == GLFW_PRESS) {
 		//Start or Pause tour
+		tour = !tour;
 	}
 	if ((key == GLFW_KEY_H) && action == GLFW_PRESS) {
 		//Display help on screen out printed on console
@@ -506,7 +549,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 	if ((key == GLFW_KEY_S) && action == GLFW_PRESS) {
 		//Print coordinate
-		printf("Zoom: %f, Pan: %f, LeftRight: %f\n, Tilt: %f", zoom, pan, leftright, tilt);
+		printf("Zoom: %f, Pan: %f, LeftRight: %f, Tilt: %f\n", zoom, pan, leftright, tilt);
 	}
 }
 
@@ -535,6 +578,7 @@ int main(){
 	bullet_init();
 	handleInit();
 	init();
+	initLerper();
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);

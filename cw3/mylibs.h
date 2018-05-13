@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <math.h>
+#include <vector>
 
 // OpenGL (GLFW/GLEW)
 #include <GL/glew.h>
@@ -17,13 +18,12 @@
 // Bullet Physics (basics)
 #include <btBulletDynamicsCommon.h>
 
-// tiny_obj_loader
-#define TINYOBJLOADER_IMPLEMENTATION // only define in one file
-#include "tiny_obj_loader.h"
-
 // stb_image
 #define STB_IMAGE_IMPLEMENTATION // only define in one file
 #include <stb_image.h>
+
+//Linear Interpolator 
+#include "include\lerper.h"
 
 GLfloat cube_VB[] = {
 	-1.0f,-1.0f,-1.0f,
@@ -180,9 +180,14 @@ GLuint LoadShader(const char * vertex_file_path, const char * fragment_file_path
 
 void printHelp() {
 	printf("****---HELP---****\n");
+	printf("*THE SOLAR SYSTEM IN THIS CW IS NOT ACCURATE! \n");
 	printf("*Press ESC/Q to quit \n");
 	printf("*Press LEFT to look left \n");
 	printf("*Press RIGHT to look right \n");
+	printf("*Press PAGE_UP to look up \n");
+	printf("*Press PAGE_DOWN to look down \n");
+	printf("*Press WASD to look around also \n");
+	printf("*Press DOWN to decrease speed \n");
 	printf("*Press UP to increase speed \n");
 	printf("*Press DOWN to decrease speed \n");
 	printf("*Press T to pause/start the tour \n");
