@@ -41,6 +41,7 @@ float tilt = 1.0f;
 float speed = 0.0005f;
 bool tour = true;
 glm::mat4 view;
+glm::vec3 coordinate;
 LerperSequencer camera;
 
 //Structs 
@@ -321,6 +322,7 @@ void initLerper() {
 
 void resetLerper() {
 	camera.reset();
+	initLerper();
 }
 
 glm::vec3 stepCamera(float step) {
@@ -438,7 +440,8 @@ void draw() {
 	//pan = newPos.y;
 	//leftright = newPos.z;
 	if (tour) {
-		view = glm::lookAt(stepCamera(speed), glm::vec3(zoom - WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+		coordinate = stepCamera(speed);
+		view = glm::lookAt(coordinate, glm::vec3(zoom-WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
 	}
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
@@ -485,7 +488,8 @@ void resetCameraAttributes() {
 
 void goToLocation(float x, float y, float z) {
 	tour = false;
-	view = glm::lookAt(glm::vec3(x, y, z), glm::vec3(zoom - WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+	coordinate = glm::vec3(x, y, z);
+	view = glm::lookAt(coordinate, glm::vec3(zoom - WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
 }
 
 void setCamera(float tZoom, float tPan, float tLeftRight) {
@@ -510,6 +514,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if ((key == GLFW_KEY_DOWN) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		if (speed >= 0) {
 			speed -= 0.0001f;
+		}
+		if (speed < 0) {
+			speed = 0;
 		}
 	}
 	if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_REPEAT || action == GLFW_PRESS) {
@@ -547,9 +554,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		//Reset Animations
 		resetAnimations();
 	}
-	if ((key == GLFW_KEY_S) && action == GLFW_PRESS) {
-		//Print coordinate
-		printf("Zoom: %f, Pan: %f, LeftRight: %f, Tilt: %f\n", zoom, pan, leftright, tilt);
+	if ((key == GLFW_KEY_I) && action == GLFW_PRESS) {
+		//Print attributes
+		printf("X: %f, Y: %f, Z: %f, Tilt: %f\n", coordinate.x, coordinate.y, coordinate.z, tilt);
 	}
 }
 
