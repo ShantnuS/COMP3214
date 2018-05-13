@@ -326,10 +326,24 @@ void initLerper() {
 	Lerper part2 = Lerper(glm::vec3(5, 0, 0), glm::vec3(400, 0, 0), speed, 0.5f);
 	Lerper part3 = Lerper(glm::vec3(400, 0, 0), glm::vec3(400, -50, 0), speed, 0.5f);
 	Lerper part4 = Lerper(glm::vec3(400, -50, 0), glm::vec3(350, -50, 0), speed, 0.5f);
+	Lerper part5 = Lerper(glm::vec3(350, -50, 0), glm::vec3(600, -50, 0), speed);
+	Lerper part6 = Lerper(glm::vec3(600, -50, 0), glm::vec3(500, -225, 0), speed, 0.5f);
+	Lerper part7 = Lerper(glm::vec3(500, -225, 0), glm::vec3(700, -225, 0), speed);
+	Lerper part8 = Lerper(glm::vec3(700, -225, 0), glm::vec3(700, -500, 0), speed);
+	Lerper part9 = Lerper(glm::vec3(700, -500, 0), glm::vec3(500, -700, 0), speed);
+	Lerper part10 = Lerper(glm::vec3(500, -700, 0), glm::vec3(500, 0, 0), speed);
+	Lerper part11 = Lerper(glm::vec3(500, 0, 0), glm::vec3(WORLDSIZE, 0, 0), speed);
 	camera.addLerper(part1);
 	camera.addLerper(part2);
 	camera.addLerper(part3);
 	camera.addLerper(part4);
+	camera.addLerper(part5);
+	camera.addLerper(part6);
+	camera.addLerper(part7);
+	camera.addLerper(part8);
+	camera.addLerper(part9);
+	camera.addLerper(part10);
+	camera.addLerper(part11);
 }
 
 void resetCameraAttributes() {
@@ -342,10 +356,16 @@ void resetCameraAttributes() {
 	speed = 0.0005f;
 }
 
+void resetAnimations() {
+	MovingBits.clear();
+	bullet_init();
+}
+
 void resetLerper() {
 	camera.reset();
 	resetCameraAttributes();
 	initLerper();
+	resetAnimations();
 }
 
 glm::vec3 stepCamera(float step) {
@@ -522,11 +542,6 @@ void draw() {
 	for (int i = 0; i < asteroidNumber; i++) {
 		drawObject(asteroids.at(i),0.1f);
 	}
-}
-
-void resetAnimations() {
-	MovingBits.clear();
-	bullet_init();
 }
 
 void goToLocation(float x, float y, float z) {
