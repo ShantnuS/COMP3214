@@ -405,13 +405,14 @@ void init() {
 	printf("Initialising objects\n");
 	//Sphere object
 	std::vector<Normal> objectSphere = generateSphere(glm::radians(1.0f));
+	std::vector<Normal> objectSphereHigh = generateSphere(glm::radians(0.5f));
 	std::vector<Normal> objectCube = generateCube();
 	std::vector<Normal> objectSkybox = generateSphere(glm::radians(5.0f));
 	//std::vector<Normal> objectUFO = generateModel("alien.obj", glm::vec3(1, 0, 0), glm::vec3(1, 0, 0));
 
 	//Spheres and cubes init
 	sphere1 = bufferInit(objectSphere);
-	sphere2 = bufferInit(objectSphere);
+	sphere2 = bufferInit(objectSphereHigh);
 	sphere3 = bufferInit(objectSphere);
 	sphere4 = bufferInit(objectSphere);
 	sphere5 = bufferInit(objectSphere);
