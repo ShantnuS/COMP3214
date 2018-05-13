@@ -36,13 +36,14 @@ glm::vec3 lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 float zoom = WORLDSIZE;
 float theta = 0.1f;
 float leftright = 0.0f;
-float pan = 0.0f;
+float updown = 0.0f;
 float tilt = 1.0f;
 float speed = 0.0005f;
 bool tour = true;
 bool tempScene = false;
 glm::mat4 view;
 glm::vec3 coordinate;
+glm::vec3 looking;
 LerperSequencer camera;
 
 //Structs 
@@ -321,8 +322,18 @@ void initLerper() {
 	camera.addLerper(part3);
 }
 
+void resetCameraAttributes() {
+	lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
+	zoom = WORLDSIZE;
+	theta = 0.1f;
+	leftright = 0.0f;
+	updown = 0.0f;
+	tilt = 1.0f;
+}
+
 void resetLerper() {
 	camera.reset();
+	resetCameraAttributes();
 	initLerper();
 }
 
@@ -442,7 +453,8 @@ void draw() {
 	//leftright = newPos.z;
 	if (tour) {
 		coordinate = stepCamera(speed);
-		view = glm::lookAt(coordinate, glm::vec3(zoom-WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+		looking = glm::vec3(coordinate.x-WORLDSIZE, coordinate.y - updown, coordinate.z - leftright);
+		view = glm::lookAt(coordinate, looking, glm::vec3(0, tilt, 0));
 	}
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
@@ -478,23 +490,15 @@ void resetAnimations() {
 	bullet_init();
 }
 
-void resetCameraAttributes() {
-	lightDirection = glm::vec3(1.0f, 0.0f, 0.0f);
-	zoom = WORLDSIZE;
-	theta = 0.1f;
-	leftright = 0.0f;
-	pan = 0.0f;
-	tilt = 1.0f;
-}
-
 void goToLocation(float x, float y, float z) {
 	coordinate = glm::vec3(x, y, z);
-	view = glm::lookAt(coordinate, glm::vec3(zoom - WORLDSIZE, pan, leftright), glm::vec3(0, tilt, 0));
+	looking = glm::vec3(x - WORLDSIZE, y - updown, z - leftright);
+	view = glm::lookAt(coordinate, looking, glm::vec3(0, tilt, 0));
 }
 
 void setCamera(float tZoom, float tPan, float tLeftRight) {
 	zoom = tZoom;
-	pan = tPan;
+	updown = tPan;
 	leftright = tLeftRight;
 }
 
@@ -521,19 +525,19 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 	if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to left 
-		leftright += 0.8f;
+		leftright -= 0.8f;
 	}
 	if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_D) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Turn camera to right 
-		leftright -= 0.8f;
+		leftright += 0.8f;
 	}
 	if ((key == GLFW_KEY_PAGE_UP || key == GLFW_KEY_W) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Pan Up
-		pan += 0.8f;
+		updown -= 0.8f;
 	}
 	if ((key == GLFW_KEY_PAGE_DOWN || key == GLFW_KEY_S) && action == GLFW_REPEAT || action == GLFW_PRESS) {
 		//Pan Down
-		pan -= 0.8f;
+		updown += 0.8f;
 	}
 
 
