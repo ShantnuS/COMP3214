@@ -1,5 +1,0 @@
-1. Load models
-2. Height map mars
-3. Add proper lighting 
-4. (maybe) Make moon orbit earth
-5. Add tour

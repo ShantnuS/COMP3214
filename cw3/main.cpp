@@ -18,6 +18,7 @@ btDiscreteDynamicsWorld* dynamicsWorld;
 //Moving items and static items
 std::vector<btRigidBody*> MovingBits; // so that can get at all bits
 std::vector<btRigidBody*> StaticBits; // especially during clean up.
+std::vector<btRigidBody*> AsteroidBits; //
 
 //Handles 
 GLuint modelHandle;
@@ -45,7 +46,7 @@ glm::mat4 view;
 glm::vec3 coordinate;
 glm::vec3 looking;
 LerperSequencer camera;
-int asteroidNumber=40;
+int asteroidNumber=10;
 
 //Structs 
 struct Object {
@@ -191,10 +192,10 @@ std::vector<Normal> generateSkybox(float step) {
 	return getNormal(sphereVectors);
 }
 
-btRigidBody* SetSphere(float size, btTransform T, btVector3 velocity) {
+btRigidBody* SetSphere(float size, btTransform T, btVector3 velocity, btScalar _mass) {
 	btCollisionShape* fallshape = new btSphereShape(size);
 	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
-	btScalar mass = 1;
+	btScalar mass = _mass;
 	btVector3 fallInertia(0, 0, 0);
 	fallshape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
@@ -245,22 +246,22 @@ void bullet_init() {
 	//dynamicsWorld->addRigidBody(topRigidBody);
 
 	//JUPITER
-	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 0, 1, 1), btVector3(-1000,0, 0)), btVector3(0, 0, 0)));
+	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 0, 1, 1), btVector3(-1000,0, 0)), btVector3(0, 0, 0), 0));
 
 	//VENUS
-	MovingBits.push_back(SetSphere(200., btTransform(btQuaternion(0, 1, 0, 1), btVector3(200, -220, 0)), btVector3(0, 0, 0)));
+	MovingBits.push_back(SetSphere(200., btTransform(btQuaternion(0, 1, 0, 1), btVector3(200, -220, 0)), btVector3(0, 0, 0), 0));
 	
 	//METEOR 
-	MovingBits.push_back(SetSphere(0.01f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(-10, 5, 20)), btVector3(0, -0.5, -1)));
+	MovingBits.push_back(SetSphere(0.01f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(-10, 5, 20)), btVector3(0, -0.5, -1), 1));
 
 	//EARTH 
-	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0)), btVector3(0, 0, 0)));
+	MovingBits.push_back(SetSphere(2., btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 0)), btVector3(0, 0, 0), 0));
 
 	//MOON
-	MovingBits.push_back(SetSphere(0.25f, btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 5)), btVector3(0, 0, 0)));
+	MovingBits.push_back(SetSphere(0.25f, btTransform(btQuaternion(0, 1, 0, 1), btVector3(0, -3, 5)), btVector3(-0.1, 0, 0), 0));
 
 	//MARS
-	MovingBits.push_back(SetSphere(2.0f, btTransform(btQuaternion(0, 1, 0, 1), btVector3(-100, 50, 0)), btVector3(0, 0, 0)));
+	MovingBits.push_back(SetSphere(2.0f, btTransform(btQuaternion(0, 1, 0, 1), btVector3(-100, 50, 0)), btVector3(0, 0, 0), 0));
 
 	//UFO
 	//MovingBits.push_back(SetSphere(0.01f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 5, 20)), btVector3(0, -0.1, -0.1)));
@@ -271,6 +272,17 @@ glm::vec3 bullet_step(int i) {
 	btRigidBody* moveRigidBody;
 	int n = MovingBits.size();
 	moveRigidBody = MovingBits[i];
+	dynamicsWorld->stepSimulation(1 / 200.f, 10);
+	//dynamicsWorld->stepSimulation(0.01, 5);
+	moveRigidBody->getMotionState()->getWorldTransform(trans);
+	return glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+}
+
+glm::vec3 asteroid_step(int i) {
+	btTransform trans;
+	btRigidBody* moveRigidBody;
+	int n = AsteroidBits.size();
+	moveRigidBody = AsteroidBits[i];
 	dynamicsWorld->stepSimulation(1 / 200.f, 10);
 	//dynamicsWorld->stepSimulation(0.01, 5);
 	moveRigidBody->getMotionState()->getWorldTransform(trans);
@@ -323,7 +335,7 @@ Object bufferInit(std::vector<Normal> vp) {
 void initLerper() {
 	camera.sequence.clear();
 	Lerper part1 = Lerper(glm::vec3(WORLDSIZE,0,0), glm::vec3(5, 0, 0), speed, 0.5f);
-	Lerper part2 = Lerper(glm::vec3(5, 0, 0), glm::vec3(400, 0, 0), speed, 0.5f);
+	Lerper part2 = Lerper(glm::vec3(5, 0, 0), glm::vec3(400, 0, 0), speed, 0.1f);
 	Lerper part3 = Lerper(glm::vec3(400, 0, 0), glm::vec3(400, -50, 0), speed, 0.5f);
 	Lerper part4 = Lerper(glm::vec3(400, -50, 0), glm::vec3(350, -50, 0), speed, 0.5f);
 	Lerper part5 = Lerper(glm::vec3(350, -50, 0), glm::vec3(600, -50, 0), speed);
@@ -356,9 +368,17 @@ void resetCameraAttributes() {
 	speed = 0.0005f;
 }
 
+void asteroidInitPhysics() {
+	for (int i = 0; i < asteroidNumber; i++) {
+		AsteroidBits.push_back(SetSphere(0.01f, btTransform(btQuaternion(1, 0, 0, 1), btVector3(-10, RandomFloat(-10, 10), RandomFloat(-10, 10))), btVector3(1, RandomFloat(-0.5, 0.5), RandomFloat(-0.5, 0.5)), 1));
+	}
+}
+
 void resetAnimations() {
 	MovingBits.clear();
+	AsteroidBits.clear();
 	bullet_init();
+	asteroidInitPhysics();
 }
 
 void resetLerper() {
@@ -372,13 +392,6 @@ glm::vec3 stepCamera(float step) {
 	return camera.lerpStepSmooth(step);
 }
 
-float RandomFloat(float a, float b) {
-	float random = ((float)rand()) / (float)RAND_MAX;
-	float diff = b - a;
-	float r = random * diff;
-	return a + r;
-}
-
 void asteroidInit() {
 	printf("Generating asteroids\n");
 	std::vector<Normal> objectSphere = generateSphere(glm::radians(5.0f));
@@ -386,9 +399,9 @@ void asteroidInit() {
 		Object asteroid;
 		asteroid = bufferInit(objectSphere);
 		asteroid.texID = asteroidTex;
-		asteroid.position = glm::vec3(-10, RandomFloat(-10, 10), RandomFloat(-10, 10));
 		asteroids.push_back(asteroid);
 	}
+	asteroidInitPhysics();
 }
 
 void handleInit() {
@@ -426,7 +439,7 @@ void init() {
 	sphere1.texID = loadTexture("texture/jupiter.jpg");
 	sphere2.texID = loadTexture("texture/venus.jpg");
 	sphere3.texID = asteroidTex;
-	sphere4.texID = loadTexture("texture/earth.png");
+	sphere4.texID = loadTexture("texture/earth.jpg");
 	sphere5.texID = loadTexture("texture/moon.jpg");
 	sphere6.texID = loadTexture("texture/mars.jpg");
 	//model1.texID = loadTexture("texture/meteor.bmp");
@@ -504,11 +517,12 @@ void draw() {
 	//zoom = newPos.x;
 	//pan = newPos.y;
 	//leftright = newPos.z;
+	
 	if (tour) {
 		coordinate = stepCamera(speed);
-		looking = glm::vec3(coordinate.x-WORLDSIZE, coordinate.y - updown, coordinate.z - leftright);
-		view = glm::lookAt(coordinate, looking, glm::vec3(0, tilt, 0));
 	}
+	looking = glm::vec3(coordinate.x - WORLDSIZE, coordinate.y - updown, coordinate.z - leftright);
+	view = glm::lookAt(coordinate, looking, glm::vec3(0, tilt, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 16.0f / 9.0f, 0.1f, 100000.0f);
 	//lightDirection = glm::quat(glm::vec3(0.0001f, 0.0001f, 0.0001f)) * lightDirection;
 	//theta += 0.001f;
@@ -541,6 +555,7 @@ void draw() {
 	
 	//Draw asteroids
 	for (int i = 0; i < asteroidNumber; i++) {
+		asteroids.at(i).position = asteroid_step(i);
 		drawObject(asteroids.at(i),0.1f);
 	}
 }
@@ -635,7 +650,7 @@ int main(){
 	glfwInit();
 
 	GLFWwindow* window;
-	window = glfwCreateWindow(1920, 1080, "Coursework 3 - Shantnu Singh", NULL, NULL);
+	window = glfwCreateWindow(1920 * 3 / 4, 1080 * 3 / 4, "Coursework 3 - Shantnu Singh", NULL, NULL);
 	if (!window) {
 		printf("Failed to open window");
 		glfwTerminate();
@@ -650,7 +665,7 @@ int main(){
 	//programSkybox = LoadShader("skybox.vert", "skybox.frag");
 	program = programDefault;
 	backgroundTex = loadTexture("texture/stars.jpg");
-	asteroidTex= loadTexture("texture/meteor.bmp");
+	asteroidTex= loadTexture("texture/meteor.jpg");
 
 	bullet_init();
 	handleInit();

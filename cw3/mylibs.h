@@ -194,3 +194,10 @@ void printHelp() {
 	printf("*Press P for screenshot location \n");
 	printf("*Press H to bring up help again! \n");
 }
+
+float RandomFloat(float a, float b) {
+	float random = ((float)rand()) / (float)RAND_MAX;
+	float diff = b - a;
+	float r = random * diff;
+	return a + r;
+}
