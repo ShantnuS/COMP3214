@@ -11,11 +11,13 @@ vec3 diffuseColor = vec3(1.0f,1.0f,1.0f);
 uniform vec3 lightDirection;
 uniform sampler2D tex;
 
+out vec4 out_color;
+
 void main(){
 	vec3 ambient = ambientColor; 
 	float nld = dot(normals, lightDirection); 
 	vec3 diffuse = nld * diffuseColor;
 	vec3 resultColor = texture2D(tex,uv).rgb * (diffuse + ambient);
 	
-	gl_FragColor = vec4(resultColor,1);
+	out_color = vec4(resultColor,1);
 }

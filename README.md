@@ -46,6 +46,8 @@ Full specifications [are available here](res/spec/cwp.pdf).
 	
 ## Coursework 3 ## 
 Create a custom scene using OpenGL with a camera tour. The theme is SPACE!  
+
+<img src="cw3/screenshot.jpg" align="middle">    
   
 [Source files here](cw3).   
   

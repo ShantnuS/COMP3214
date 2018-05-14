@@ -20,7 +20,7 @@
 
 // stb_image
 #define STB_IMAGE_IMPLEMENTATION // only define in one file
-#include <stb_image.h>
+#include "stb_image.h"
 
 //Linear Interpolator 
 #include "include\lerper.h"
